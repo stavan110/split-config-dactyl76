@@ -1,0 +1,71 @@
+;; ============================================================================
+;; windows.kbd — Windows entry point for kanata
+;;
+;; Usage (PowerShell, as Admin OR with the Interception driver installed):
+;;   kanata.exe -c C:\path\to\split-keyboard-setup\kanata\windows.kbd
+;;
+;; Prereqs:
+;;   - Download kanata.exe from https://github.com/jtroo/kanata/releases
+;;     (pick the *_wintercept.exe build if you want exclusive grabbing of
+;;      the split halves; otherwise the regular .exe works fine via LLHOOK)
+;;   - In Vial, LEFT inner thumb = F14 and RIGHT inner thumb = F13
+;;
+;; Filtering to just the split keyboard (Wintercept build only):
+;;   Run `kanata.exe --list` to see hardware IDs and add them to
+;;   windows-only-windows-interception-keyboard-hwids below. This makes
+;;   kanata ignore the laptop's built-in keyboard.
+;; ============================================================================
+
+(defcfg
+  process-unmapped-keys no
+  concurrent-tap-hold   yes
+
+  ;; UNCOMMENT and fill in if using the Wintercept build:
+  ;; windows-only-windows-interception-keyboard-hwids (
+  ;;   "HID\\VID_XXXX&PID_YYYY..."   ;; Left half
+  ;;   "HID\\VID_XXXX&PID_ZZZZ..."   ;; Right half
+  ;; )
+)
+
+;; ----------------------------------------------------------------------------
+;; Clipboard / word-jump  (Ctrl-based on Windows)
+;; ----------------------------------------------------------------------------
+(defalias
+  und  C-z
+  cut  C-x
+  cpy  C-c
+  pst  C-v
+  rdo  C-S-z
+  wrdl C-left
+  wrdr C-right
+)
+
+;; ----------------------------------------------------------------------------
+;; Media + brightness
+;; ----------------------------------------------------------------------------
+(defalias
+  prev prev
+  play pp
+  next next
+  vold vold
+  volu volu
+  mute mute
+  brdn brdn
+  brup brup
+)
+
+;; ----------------------------------------------------------------------------
+;; IDE actions — Hyper chords (M-C-A-S-letter).
+;; M = Win key on Windows.
+;; ----------------------------------------------------------------------------
+(defalias
+  bld  M-C-A-S-b
+  run  M-C-A-S-r
+  tst  M-C-A-S-t
+  dbg  M-C-A-S-d
+  fmt  M-C-A-S-f
+  goto M-C-A-S-g
+  ref  M-C-A-S-u
+)
+
+(include "common-layers.kbd")

@@ -1,0 +1,101 @@
+;; ============================================================================
+;; common-layers.kbd
+;; Cross-platform layer definitions for the Dactyl 76 split keyboard.
+;;
+;; This file is INCLUDED by mac.kbd or windows.kbd.
+;; The parent file must define the following ALIASES before the include:
+;;
+;;   @und @cut @cpy @pst @rdo    clipboard shortcuts (Cmd-* on Mac, Ctrl-* on Win)
+;;   @wrdl @wrdr                 jump word left / right
+;;   @prev @play @next           media controls
+;;   @vold @volu @mute           volume
+;;   @brdn @brup                 screen brightness
+;;   @bld @run @tst @dbg @fmt    IDE Hyper-chords (M-C-A-S-letter)
+;;   @goto @ref                  IDE Hyper-chords
+;; ============================================================================
+
+(defvar
+  tap-time   200
+  hold-time  200
+)
+
+;; ----------------------------------------------------------------------------
+;; Layer-trigger aliases
+;; ----------------------------------------------------------------------------
+(defalias
+  to-sym (layer-while-held sym)
+  to-nav (layer-while-held nav)
+  to-fn  (layer-while-held fn)
+)
+
+;; ----------------------------------------------------------------------------
+;; defsrc — the keys kanata will grab from BOTH halves combined.
+;; Any key NOT listed here is left completely alone (process-unmapped-keys no).
+;;
+;; Layout: 5 cols x 4 rows per side (outer pinky col stays passthrough)
+;;         + 2 layer-trigger thumb keys (F14 left, F13 right) set in Vial.
+;; ----------------------------------------------------------------------------
+(defsrc
+  ;; numbers row
+  1    2    3    4    5            6    7    8    9    0
+  ;; qwerty row
+  q    w    e    r    t            y    u    i    o    p
+  ;; home row
+  a    s    d    f    g            h    j    k    l    ;
+  ;; bottom row
+  z    x    c    v    b            n    m    ,    .    /
+  ;;            inner thumbs
+                          f14    f13
+)
+
+;; ----------------------------------------------------------------------------
+;; BASE — pure passthrough. The only kanata-active keys are the two thumbs.
+;; ----------------------------------------------------------------------------
+(deflayer base
+  _    _    _    _    _            _    _    _    _    _
+  _    _    _    _    _            _    _    _    _    _
+  _    _    _    _    _            _    _    _    _    _
+  _    _    _    _    _            _    _    _    _    _
+                          @to-sym @to-nav
+)
+
+;; ----------------------------------------------------------------------------
+;; NAV — hold RIGHT inner thumb (F13)
+;;   Right hand: arrows (hjkl), Home/End/PgUp/PgDn, word-jump on m / .
+;;   Left  hand: clipboard chord on bottom row (Undo/Cut/Cpy/Pst/Redo)
+;; ----------------------------------------------------------------------------
+(deflayer nav
+  _    _    _    _    _            _    _    _    _    _
+  _    _    _    _    _            _    home pgup end  _
+  _    _    _    _    _            left down up   rght pgdn
+  _    @und @cut @cpy @pst         _    @wrdl _    @wrdr _
+                          @to-fn  _
+)
+
+;; ----------------------------------------------------------------------------
+;; SYM — hold LEFT inner thumb (F14)
+;;   Left  hand: symbols clustered around home position
+;;   Right hand: full numpad (7/8/9, 4/5/6, 1/2/3, 0)
+;; ----------------------------------------------------------------------------
+(deflayer sym
+  _    _    _    _    _            _    _    _    _    _
+  S-1  S-2  S-3  S-4  S-5          S-6  7    8    9    S-8
+  grv  S-grv S-[ S-]  S-bksl       S-=  4    5    6    -
+  bksl /    S-9  S-0  S-7          0    1    2    3    .
+                          _      @to-fn
+)
+
+;; ----------------------------------------------------------------------------
+;; FN / IDE — hold BOTH inner thumbs
+;;   Numbers row : F1 .. F10
+;;   QWERTY row  : IDE build/run/test/debug/format    +  brightness on u/i
+;;   Home   row  : (passthrough left)                 +  volume on h/j/k
+;;   Bottom row  : F9/F8/F7 + Goto/Ref                +  media prev/play/next
+;; ----------------------------------------------------------------------------
+(deflayer fn
+  f1   f2   f3   f4   f5           f6   f7   f8   f9   f10
+  _    @bld @run @tst @dbg         @brdn @brup _    _    _
+  _    _    _    _    _            @vold @volu @mute _    _
+  f9   f8   f7   @goto @ref        @prev @play @next _    _
+                          _      _
+)

@@ -1,0 +1,81 @@
+;; ============================================================================
+;; mac.kbd — macOS entry point for kanata
+;;
+;; Usage:
+;;   sudo kanata -c /Users/stavanpatel/src/split-keyboard-setup/kanata/mac.kbd
+;;
+;; Prereqs:
+;;   - Karabiner-DriverKit-VirtualHIDDevice v6.2.0 installed and approved
+;;   - The Karabiner VHID daemon is running
+;;   - kanata has Input Monitoring + Accessibility permissions
+;;   - In Vial, the LEFT inner thumb is set to F14 and the RIGHT inner thumb
+;;     is set to F13
+;;
+;; Filtering to just the split keyboard:
+;;   Run `sudo kanata --list -c mac.kbd` once to see device names, then add
+;;   them to the macos-dev-names-include block below. This makes kanata
+;;   ignore the built-in MacBook keyboard.
+;; ============================================================================
+
+(defcfg
+  process-unmapped-keys no
+  concurrent-tap-hold   yes
+  movemouse-smooth-diagonals yes
+
+  ;; Only intercept the two Dactyl 76 halves. The MacBook's built-in keyboard
+  ;; is left untouched so disconnecting the split keeps the laptop usable.
+  ;; Discovered via `sudo kanata --list`:
+  ;;   Dactyl_76_L  hash 0xE3D84B0E1C969CAB  vendor 39572 product 2
+  ;;   Dactyl_76_R  hash 0xE3D8590E1C96B475  vendor 39572 product 2
+  macos-dev-names-include (
+    "Dactyl_76_L"
+    "Dactyl_76_R"
+  )
+)
+
+;; ----------------------------------------------------------------------------
+;; Clipboard / word-jump  (Cmd-based on macOS)
+;; ----------------------------------------------------------------------------
+(defalias
+  und  M-z
+  cut  M-x
+  cpy  M-c
+  pst  M-v
+  rdo  M-S-z
+  wrdl A-left
+  wrdr A-right
+)
+
+;; ----------------------------------------------------------------------------
+;; Media + brightness
+;; ----------------------------------------------------------------------------
+(defalias
+  prev prev
+  play pp
+  next next
+  vold vold
+  volu volu
+  mute mute
+  brdn brdn
+  brup brup
+)
+
+;; ----------------------------------------------------------------------------
+;; IDE actions — Hyper chords (M-C-A-S-letter).
+;; M = Cmd on macOS, Win on Windows — so the SAME chord works on both OSes.
+;; Bind these in each IDE (see ide/BINDINGS.md).
+;; ----------------------------------------------------------------------------
+(defalias
+  bld  M-C-A-S-b
+  run  M-C-A-S-r
+  tst  M-C-A-S-t
+  dbg  M-C-A-S-d
+  fmt  M-C-A-S-f
+  goto M-C-A-S-g
+  ref  M-C-A-S-u
+)
+
+;; ----------------------------------------------------------------------------
+;; Pull in the cross-platform layer definitions
+;; ----------------------------------------------------------------------------
+(include "common-layers.kbd")
