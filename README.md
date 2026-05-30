@@ -37,8 +37,12 @@ sides.
 3. **Run kanata** pointing at `kanata/mac.kbd` or `kanata/windows.kbd`.
 4. **IDE bindings**: open `ide/BINDINGS.md` and bind the Hyper-chords inside
    each IDE you use (one-time, ~5 minutes per IDE).
-5. **Learn the layers**: print `CHEATSHEET.md`. Refer to `KEYMAP.md` for the
-   visual reference.
+5. **Learn the layers**: print the cheatsheet. Run
+   `./scripts/build-cheatsheet` to render `CHEATSHEET.pdf` (and `.html`) from
+   `CHEATSHEET.md`. Requires Node/npx and a Chromium-family browser
+   (Chrome/Chromium/Edge/Brave). The PDF is landscape Letter, 2 pages, and
+   fits a small grid of layers — print it and tape it next to your screen for
+   the first few days. Refer to `KEYMAP.md` for the visual reference.
 
 ## Design summary
 

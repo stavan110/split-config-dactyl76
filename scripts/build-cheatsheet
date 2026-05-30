@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# Build CHEATSHEET.html and CHEATSHEET.pdf from CHEATSHEET.md.
+#
+# Requires:
+#   - node + npx in PATH (we use `npx -y marked` so no install needed)
+#   - Google Chrome, Chromium, or Microsoft Edge (used in headless mode for PDF)
+#
+# Output is git-ignored (see .gitignore).
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+SRC=CHEATSHEET.md
+HTML=CHEATSHEET.html
+PDF=CHEATSHEET.pdf
+
+if [[ ! -f "$SRC" ]]; then
+  echo "Missing source: $SRC" >&2
+  exit 1
+fi
+
+# Locate a Chromium-family browser.
+BROWSER=""
+for candidate in \
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+    "/Applications/Chromium.app/Contents/MacOS/Chromium" \
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge" \
+    "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" \
+    "$(command -v google-chrome 2>/dev/null || true)" \
+    "$(command -v chromium 2>/dev/null || true)" \
+    "$(command -v chromium-browser 2>/dev/null || true)" \
+    "$(command -v msedge 2>/dev/null || true)"; do
+  if [[ -n "$candidate" && -x "$candidate" ]]; then
+    BROWSER="$candidate"
+    break
+  fi
+done
+
+if [[ -z "$BROWSER" ]]; then
+  echo "No Chromium-family browser found (Chrome/Chromium/Edge/Brave)." >&2
+  echo "Install Google Chrome from https://www.google.com/chrome/ and retry." >&2
+  exit 1
+fi
+
+if ! command -v npx >/dev/null 2>&1; then
+  echo "npx not found — install Node.js (https://nodejs.org/) and retry." >&2
+  exit 1
+fi
+
+echo "Rendering Markdown -> HTML..."
+BODY="$(npx --yes marked@13 --gfm < "$SRC")"
+
+cat > "$HTML" <<'HEAD'
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Split Keyboard Cheatsheet</title>
+<style>
+  @page { size: Letter landscape; margin: 10mm 12mm; }
+  html, body {
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    color: #111;
+  }
+  body { margin: 0; padding: 0; font-size: 10pt; line-height: 1.3; }
+  h1 { font-size: 16pt; margin: 0 0 4pt; }
+  h2 {
+    font-size: 12pt;
+    margin: 10pt 0 4pt;
+    border-bottom: 1px solid #999;
+    padding-bottom: 2pt;
+    break-after: avoid;
+  }
+  h2:first-of-type { margin-top: 4pt; }
+  pre, code, kbd {
+    font-family: "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Courier New", monospace;
+  }
+  pre {
+    font-size: 7.5pt;
+    line-height: 1.05;
+    margin: 4pt 0;
+    white-space: pre;
+    break-inside: avoid;
+  }
+  code { font-size: 9pt; background: #f1f1f1; padding: 0 2px; border-radius: 2px; }
+  pre code { background: transparent; padding: 0; font-size: inherit; }
+  ul { margin: 2pt 0 4pt 18pt; padding: 0; }
+  li { margin: 1pt 0; }
+  table { border-collapse: collapse; margin: 4pt 0; font-size: 9pt; break-inside: avoid; }
+  th, td { border: 1px solid #aaa; padding: 1pt 6pt; text-align: left; }
+  th { background: #eee; }
+  blockquote {
+    border-left: 3px solid #888;
+    margin: 4pt 0;
+    padding: 2pt 8pt;
+    background: #f8f8f8;
+    font-size: 9.5pt;
+  }
+  blockquote p { margin: 0; }
+</style>
+</head>
+<body>
+HEAD
+
+printf '%s\n' "$BODY" >> "$HTML"
+echo "</body></html>" >> "$HTML"
+
+echo "Rendering HTML -> PDF (headless browser)..."
+TMP_USER_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_USER_DIR"' EXIT
+
+"$BROWSER" \
+  --headless=new \
+  --disable-gpu \
+  --no-pdf-header-footer \
+  --user-data-dir="$TMP_USER_DIR" \
+  --print-to-pdf="$PWD/$PDF" \
+  "file://$PWD/$HTML" >/dev/null 2>&1 || {
+    # Fallback for older Chrome that doesn't know --headless=new
+    "$BROWSER" \
+      --headless \
+      --disable-gpu \
+      --no-pdf-header-footer \
+      --user-data-dir="$TMP_USER_DIR" \
+      --print-to-pdf="$PWD/$PDF" \
+      "file://$PWD/$HTML" >/dev/null 2>&1
+  }
+
+echo
+echo "Wrote: $HTML"
+echo "Wrote: $PDF"
+echo
+echo "Open with:  open '$PDF'"
+echo "Print with: lp '$PDF'   (or use Preview -> Cmd+P)"
