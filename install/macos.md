@@ -237,6 +237,32 @@ Look at `~/Library/Logs/kanata-tray.log` if anything misbehaves.
 - Click the menu-bar icon → switch preset to **OFF** (or just **Stop**).
 - Or unplug both halves — kanata only ever touches those two devices.
 
+## After unplug / replug → run `kanata-restart`
+
+kanata 1.11.0 holds device handles for its lifetime. If the keyboard is
+unplugged and replugged (or you boot without it and connect it later),
+kanata's existing handles are stale: keys pass through with **no
+layers** but the process still looks healthy.
+
+Bounce the tray to re-grab:
+
+```bash
+kanata-restart       # symlinked from scripts/kanata-restart
+# or manually:
+launchctl bootout  "gui/$(id -u)/com.github.kanata-tray"
+launchctl bootstrap "gui/$(id -u)" ~/Library/LaunchAgents/com.github.kanata-tray.plist
+```
+
+**Test it's actually working** without typing-and-guessing:
+
+```bash
+# Hold inner-right thumb while this runs — you should see LayerChange events.
+echo '{"RequestCurrentLayerName":{}}' | nc 127.0.0.1 5829
+```
+
+If holding the thumb produces `{"LayerChange":{"new":"nav"}}`, the full
+stack (Vial → kanata → layers) is working.
+
 ## Uninstall
 
 ```bash

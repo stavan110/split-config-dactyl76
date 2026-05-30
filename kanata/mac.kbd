@@ -66,13 +66,39 @@
 ;; Bind these in each IDE (see ide/BINDINGS.md).
 ;; ----------------------------------------------------------------------------
 (defalias
-  bld  M-C-A-S-b
-  run  M-C-A-S-r
-  tst  M-C-A-S-t
-  dbg  M-C-A-S-d
-  fmt  M-C-A-S-f
-  goto M-C-A-S-g
-  ref  M-C-A-S-u
+  bld    M-C-A-S-b
+  run    M-C-A-S-r
+  tst    M-C-A-S-t
+  dbg    M-C-A-S-d
+  fmt    M-C-A-S-f
+  goto   M-C-A-S-g
+  ref    M-C-A-S-u
+  ren    M-C-A-S-n
+  back   M-C-A-S-[
+  fwd    M-C-A-S-]
+  recent M-C-A-S-e
+  open   M-C-A-S-p
+  term   M-C-A-S-grv
+  side   M-C-A-S-s
+)
+
+;; ----------------------------------------------------------------------------
+;; One-shot modifiers (used on NAV layer for composing with arrows / nav keys)
+;; 1000ms timeout is a failsafe — the one-shot fires on next non-mod keypress.
+;; ----------------------------------------------------------------------------
+(defalias
+  oscmd (one-shot 1000 lmet)
+  osctl (one-shot 1000 lctl)
+  osalt (one-shot 1000 lalt)
+  osshf (one-shot 1000 lsft)
+)
+
+;; ----------------------------------------------------------------------------
+;; Document-jump (begin/end of file)
+;; ----------------------------------------------------------------------------
+(defalias
+  docb M-up
+  doce M-down
 )
 
 ;; ----------------------------------------------------------------------------

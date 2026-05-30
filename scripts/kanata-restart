@@ -1,0 +1,16 @@
+#!/bin/bash
+# kanata-restart — bounce the kanata-tray LaunchAgent so kanata re-grabs the
+# split halves. Use this after unplugging/replugging the keyboard.
+set -e
+UID_=$(id -u)
+echo "→ Stopping kanata-tray..."
+launchctl bootout "gui/${UID_}/com.github.kanata-tray" 2>/dev/null || true
+sleep 2
+echo "→ Starting kanata-tray..."
+launchctl bootstrap "gui/${UID_}" "$HOME/Library/LaunchAgents/com.github.kanata-tray.plist"
+sleep 3
+echo "→ Active processes:"
+pgrep -lf "kanata-tray|kanata --cfg" || echo "(nothing running — check ~/Library/Logs/kanata-tray.log)"
+echo ""
+echo "→ Layer state:"
+echo '{"RequestCurrentLayerName":{}}' | nc -w 1 127.0.0.1 5829 2>/dev/null | head -2 || echo "(TCP not responding yet — wait a few seconds)"

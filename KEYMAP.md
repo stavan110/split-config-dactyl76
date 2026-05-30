@@ -1,130 +1,132 @@
 # KEYMAP
 
-> All diagrams show the 5 main rows + 6 active columns + the **3 outer thumb
-> keys** per side that you actually use. Any extra row 0 / row 5 / inner-thumb
-> keys you don't use stay completely passthrough.
+> These diagrams show the 5 kanata-managed columns per hand plus the two inner
+> thumb keys (`F14` left, `F13` right). Everything outside this `defsrc` remains
+> outside the keymap.
 >
-> `──` = passthrough (the base-layer key still works while this layer is held)
-> `HELD` = the thumb you're currently holding to activate this layer
-> `FN→`  = pressing this with the other layer held jumps to the FN layer
+> `─` = passthrough. A visible `_` on SYM is the underscore key. The grids show
+> the characters/actions produced; Kanata may emit shifted tokens internally.
+> Pinky guardrail: positions `1` and `0` stay passthrough on every non-BASE
+> layer.
 
----
+Physical positions, left hand then right hand:
 
-## 🔹 BASE — default (kanata is invisible; you type normal QWERTY)
-
-```
-┌────┬────┬────┬────┬────┬────┐                ┌────┬────┬────┬────┬────┬────┐
-│ `  │ 1  │ 2  │ 3  │ 4  │ 5  │                │ 6  │ 7  │ 8  │ 9  │ 0  │ -  │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│Tab │ Q  │ W  │ E  │ R  │ T  │                │ Y  │ U  │ I  │ O  │ P  │ \  │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│Esc │ A  │ S  │ D  │ F  │ G  │                │ H  │ J  │ K  │ L  │ ;  │ '  │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│Sft │ Z  │ X  │ C  │ V  │ B  │                │ N  │ M  │ ,  │ .  │ /  │Sft │
-└────┴────┴────┴────┴────┴────┘                └────┴────┴────┴────┴────┴────┘
-                   ┌────┬────┬────┐        ┌────┬────┬────┐
-                   │ ⌘  │ ⌫  │SYM*│        │NAV*│ ␣  │ ⏎  │
-                   └────┴────┴────┘        └────┴────┴────┘
-                     outer ← inner            inner → outer
+```text
+1    2    3    4    5            6    7    8    9    0
+q    w    e    r    t            y    u    i    o    p
+a    s    d    f    g            h    j    k    l    ;
+z    x    c    v    b            n    m    ,    .    /
+                          f14    f13
 ```
 
-`SYM*` and `NAV*` are the inner thumb keys. In Vial they are set to **F14**
-(left = SYM) and **F13** (right = NAV) — kanata grabs F13/F14 and turns them
-into momentary layer triggers.
+## 🔹 BASE — normal typing
 
----
+BASE is intentionally transparent: normal QWERTY/number-row typing, with the
+inner thumbs acting as layer holds.
 
-## 🔹 NAV — hold *right* inner thumb (F13)
-
-```
-┌────┬────┬────┬────┬────┬────┐                ┌────┬────┬────┬────┬────┬────┐
-│ ── │ ── │ ── │ ── │ ── │ ── │                │ ── │ ── │ ── │ ── │ ── │ ── │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │ ── │ ── │ ── │ ── │ ── │                │ ── │Home│PgUp│End │ ── │ ── │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │ ── │ ── │ ── │ ── │ ── │                │ ←  │ ↓  │ ↑  │ →  │PgDn│ ── │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │Undo│Cut │Copy│Pst │Redo│                │ ── │WrdL│ ── │WrdR│ ── │ ── │
-└────┴────┴────┴────┴────┴────┘                └────┴────┴────┴────┴────┴────┘
-                   ┌────┬────┬────┐        ┌────┬────┬────┐
-                   │ ⌘  │ ⌫  │ FN→│        │HELD│ ␣  │ ⏎  │
-                   └────┴────┴────┘        └────┴────┴────┘
+```text
+┌────────┬────────┬────────┬────────┬────────┐                ┌────────┬────────┬────────┬────────┬────────┐
+│   1    │   2    │   3    │   4    │   5    │                │   6    │   7    │   8    │   9    │   0    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   Q    │   W    │   E    │   R    │   T    │                │   Y    │   U    │   I    │   O    │   P    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   A    │   S    │   D    │   F    │   G    │                │   H    │   J    │   K    │   L    │   ;    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   Z    │   X    │   C    │   V    │   B    │                │   N    │   M    │   ,    │   .    │   /    │
+└────────┴────────┴────────┴────────┴────────┘                └────────┴────────┴────────┴────────┴────────┘
+                         ┌────────┐        ┌────────┐
+                         │  SYM*  │        │  NAV*  │
+                         └────────┘        └────────┘
+                              F14                F13
 ```
 
-- Hold base **Shift** + Arrow = select (Shift still works while NAV is held).
-- Hold base **⌘** thumb + Arrow = line jump (⌘ thumb still works while NAV is held).
-- `WrdL` / `WrdR` jump previous/next word (⌥+← / ⌥+→ on Mac, Ctrl+← / Ctrl+→ on Windows).
-- Undo/Cut/Copy/Paste/Redo are Cmd-chords on Mac, Ctrl-chords on Windows.
+- Hold **left inner thumb (`F14`)** for **SYM**.
+- Hold **right inner thumb (`F13`)** for **NAV**.
+- Hold the opposite inner thumb while in SYM/NAV for **FN**.
 
----
+## 🔹 NAV — movement, selection, clipboard
 
-## 🔹 SYM — hold *left* inner thumb (F14)
-
-```
-┌────┬────┬────┬────┬────┬────┐                ┌────┬────┬────┬────┬────┬────┐
-│ ── │ ── │ ── │ ── │ ── │ ── │                │ ── │ ── │ ── │ ── │ ── │ ── │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │ !  │ @  │ #  │ $  │ %  │                │ ^  │ 7  │ 8  │ 9  │ *  │ ── │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │ `  │ ~  │ {  │ }  │ |  │                │ +  │ 4  │ 5  │ 6  │ -  │ =  │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │ \  │ /  │ (  │ )  │ &  │                │ 0  │ 1  │ 2  │ 3  │ .  │ ── │
-└────┴────┴────┴────┴────┴────┘                └────┴────┴────┴────┴────┴────┘
-                   ┌────┬────┬────┐        ┌────┬────┬────┐
-                   │ ⌘  │ ⌫  │HELD│        │ FN→│ ␣  │ ⏎  │
-                   └────┴────┴────┘        └────┴────┴────┘
+```text
+┌────────┬────────┬────────┬────────┬────────┐                ┌────────┬────────┬────────┬────────┬────────┐
+│   ─    │   ─    │   ─    │   ─    │   ─    │                │   ─    │   ─    │   ─    │   ─    │   ─    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   ─    │   ─    │   ─    │   ─    │   ─    │                │  DocB  │  Home  │  PgUp  │  End   │  DocE  │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│  Cmd   │  Ctrl  │  Alt   │ Shift  │   ─    │                │   ←    │   ↓    │   ↑    │   →    │   ─    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│  Undo  │  Cut   │  Copy  │ Paste  │  Redo  │                │  Wrd←  │   ─    │  PgDn  │  Wrd→  │   ─    │
+└────────┴────────┴────────┴────────┴────────┘                └────────┴────────┴────────┴────────┴────────┘
+                         ┌────────┐        ┌────────┐
+                         │  FN→   │        │  HELD  │
+                         └────────┘        └────────┘
+                              F14                F13
 ```
 
-- Left hand: all the symbols you reach for in code, close to home position.
-- Right hand: full numpad — `7 8 9`, `4 5 6`, `1 2 3`, `0` on the pinky.
-- Operators on the outer right column: `*  -  .` for quick math.
+- Left hand gives one-shot modifiers on the home row: **Cmd / Ctrl / Alt / Shift** on `a s d f`.
+  - On Windows, the Cmd position sends Ctrl.
+  - Compose them with right-hand arrows for selection, line jumps, and word/document movement.
+- Right hand keeps motion clustered: arrows on `h j k l`, Home/PgUp/End on `u i o`, document begin/end on `y p`, word jumps on `n .`, and PgDn on `,`.
+- Clipboard is left-bottom-row: **Undo / Cut / Copy / Paste / Redo** on `z x c v b`.
 
----
+## 🔹 SYM — programming symbols
 
-## 🔹 FN / IDE — hold *both* inner thumbs (F13 + F14)
-
+```text
+┌────────┬────────┬────────┬────────┬────────┐                ┌────────┬────────┬────────┬────────┬────────┐
+│   ─    │   @    │   #    │   $    │   %    │                │   `    │   ^    │   ~    │   :    │   ─    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   "    │   '    │   +    │   |    │   *    │                │   :    │   |    │   <    │   >    │   ?    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   !    │   [    │   {    │   (    │   =    │                │   =    │   )    │   }    │   ]    │   ;    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   \    │   /    │   ?    │   -    │   &    │                │   &    │   _    │   ,    │   .    │   /    │
+└────────┴────────┴────────┴────────┴────────┘                └────────┴────────┴────────┴────────┴────────┘
+                         ┌────────┐        ┌────────┐
+                         │  HELD  │        │  FN→   │
+                         └────────┘        └────────┘
+                              F14                F13
 ```
-┌────┬────┬────┬────┬────┬────┐                ┌────┬────┬────┬────┬────┬────┐
-│ ── │ F1 │ F2 │ F3 │ F4 │ F5 │                │ F6 │ F7 │ F8 │ F9 │F10 │F11 │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │ ── │ ── │ ── │ ── │ ── │                │Brt-│Brt+│ ── │ ── │ ── │F12 │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │Bld │Run │Tst │Dbg │Fmt │                │Vol-│Vol+│Mute│ ── │ ── │ ── │
-├────┼────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┼────┤
-│ ── │Brk │StO │StI │Goto│Ref │                │Prev│Play│Next│ ── │ ── │ ── │
-└────┴────┴────┴────┴────┴────┘                └────┴────┴────┴────┴────┴────┘
-                   ┌────┬────┬────┐        ┌────┬────┬────┐
-                   │ ⌘  │ ⌫  │HELD│        │HELD│ ␣  │ ⏎  │
-                   └────┴────┴────┘        └────┴────┴────┘
+
+- **No shift-chords:** the layer emits programming symbols directly (`@`, `{`, `?`, etc.).
+- **Mirrored brackets:** `s/l = []`, `d/k = {}`, `f/j = ()`.
+- **Cross-hand digraphs:** `g`+`h` = `==`, `b`+`n` = `&&`, `r`+`u` = `||`, `x`+`/` = `//`, `c`+`p` = `??`, `c`+`.` = `?.`.
+- **Pinky never extends:** `1` and `0` remain passthrough here too.
+
+## 🔹 FN — function keys + IDE Hyper chords
+
+```text
+┌────────┬────────┬────────┬────────┬────────┐                ┌────────┬────────┬────────┬────────┬────────┐
+│   ─    │   F2   │   F3   │   F4   │   F5   │                │   F6   │   F7   │   F8   │   F9   │   ─    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   F1   │   ─    │ Recent │  Run   │  Test  │                │   ─    │ Usages │   ─    │  Open  │  F10   │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   ─    │  Side  │ Debug  │ Format │  Goto  │                │  Back  │   ─    │   ─    │  Fwd   │   ─    │
+├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
+│   ─    │   ─    │   ─    │   ─    │ Build  │                │ Rename │Terminal│   ─    │   ─    │   ─    │
+└────────┴────────┴────────┴────────┴────────┘                └────────┴────────┴────────┴────────┴────────┘
+                         ┌────────┐        ┌────────┐
+                         │   ─    │        │   ─    │
+                         └────────┘        └────────┘
+                              F14                F13
 ```
 
-**Top row F1–F11 + F12** is the standard F-row, useful in any app that uses
-F-keys (browsers, debuggers, etc.).
+The IDE actions send Hyper chords (`M-C-A-S-*`) so every editor can bind them
+without colliding with normal shortcuts.
 
-### IDE actions (Hyper = ⌘⌃⌥⇧ on Mac, Win+Ctrl+Alt+Shift on Windows)
+| Action | Position | Sends |
+|---|---:|---|
+| Build | `b` | `M-C-A-S-b` |
+| Run | `r` | `M-C-A-S-r` |
+| Test | `t` | `M-C-A-S-t` |
+| Debug | `d` | `M-C-A-S-d` |
+| Format | `f` | `M-C-A-S-f` |
+| Goto | `g` | `M-C-A-S-g` |
+| Usages / references | `u` | `M-C-A-S-u` |
+| Rename | `n` | `M-C-A-S-n` |
+| Back | `h` | `M-C-A-S-[` |
+| Forward | `l` | `M-C-A-S-]` |
+| Recent Files | `e` | `M-C-A-S-e` |
+| Quick Open | `o` | `M-C-A-S-p` |
+| Terminal | `m` | `` M-C-A-S-` `` |
+| Sidebar | `s` | `M-C-A-S-s` |
 
-| Position (left hand) | Sends     | Bind in IDE to              |
-|----------------------|-----------|-----------------------------|
-| Row 3 col 1 (`Q`)    | Hyper+B   | Build / Compile             |
-| Row 3 col 2 (`W`)    | Hyper+R   | Run                         |
-| Row 3 col 3 (`E`)    | Hyper+T   | Run tests (file)            |
-| Row 3 col 4 (`R`)    | Hyper+D   | Start debug                 |
-| Row 3 col 5 (`T`)    | Hyper+F   | Format / Reformat code      |
-| Row 4 col 1 (`Z`)    | F9        | Toggle breakpoint *(standard)* |
-| Row 4 col 2 (`X`)    | F8        | Step over *(standard)*      |
-| Row 4 col 3 (`C`)    | F7        | Step into *(standard)*      |
-| Row 4 col 4 (`V`)    | Hyper+G   | Go to definition            |
-| Row 4 col 5 (`B`)    | Hyper+U   | Find usages / references    |
-
-See `../ide/BINDINGS.md` for exact menu paths per IDE.
-
----
-
-## Layer-trigger cheatsheet
-
-| Want | Hold |
-|------|------|
-| Arrows / nav / clipboard | Right inner thumb (F13) |
-| Symbols / numpad         | Left inner thumb (F14)  |
-| F-keys / IDE / media     | Both inner thumbs (F13 + F14, either order) |
-| Just type                | Don't hold anything     |
+Function keys live on the top rows: `q = F1`, `2-5 = F2-F5`, `6-9 = F6-F9`, and `p = F10`.

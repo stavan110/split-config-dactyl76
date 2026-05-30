@@ -1,6 +1,26 @@
 # Current State
 
-_Last updated: 2026-05-25 (tray-based setup complete on macOS)_
+_Last updated: 2026-05-29 (new programming-optimized keymap deployed)_
+
+## 🆕 Latest milestone — programming-optimized keymap
+
+A 4-person research team (Ergonomics, Symbols, Layouts, Tooling) analyzed
+the old keymap and produced a new design. Lead engineer synthesized; rubber-
+duck reviewed; deployed to `/etc/kanata/` and pushed to repo.
+
+Highlights:
+- SYM is a full programming symbol layer — no shift-chord needed.
+- Brackets mirror across hands: `s/l = []`, `d/k = {}`, `f/j = ()`.
+- Common digraphs `== && || // ?? ?.` are cross-hand (duplicates).
+- NAV adds left-hand one-shot mods (Cmd/Ctrl/Alt/Shift on `a s d f`).
+- FN adds Rename, Back/Forward, Recent Files, Quick Open, Terminal, Sidebar.
+- Pinky never extends: positions `1` and `0` stay passthrough.
+- 13 new aliases in mac.kbd/windows.kbd: `oscmd osctl osalt osshf docb doce
+  ren back fwd recent open term side`.
+
+Research artifacts (in this session's `files/` dir):
+`audit-current.md`, `research-symbols.md`, `research-layouts.md`,
+`research-shortcuts.md`, `design-rationale.md`, `rubber-duck-critique.md`.
 
 ## ✅ Completed (macOS)
 
@@ -58,6 +78,36 @@ _Last updated: 2026-05-25 (tray-based setup complete on macOS)_
 - [x] Verified end-to-end: tray launches kanata via wrapper, kanata
       grabs both Dactyl halves, no IOHIDDeviceOpen errors, TCP control
       socket connected.
+
+## 🔁 Runtime gotcha: replug requires kanata restart
+
+kanata 1.11.0 holds IOHIDDevice handles for the lifetime of the process.
+If you **unplug the keyboard and replug it** (or boot with halves
+unplugged and connect them later), kanata is still running but its
+device handles are stale — keys pass through with **no layers**.
+
+**Fix:** restart the tray. There's a helper script:
+
+```bash
+# Symlinked into ~/.local/bin and lives at:
+#   /Users/stavanpatel/src/split-keyboard-setup/scripts/kanata-restart
+kanata-restart
+```
+
+Or manually:
+```bash
+launchctl bootout  "gui/$(id -u)/com.github.kanata-tray"
+launchctl bootstrap "gui/$(id -u)" ~/Library/LaunchAgents/com.github.kanata-tray.plist
+```
+
+**How to detect this state:** kanata's TCP socket still responds and
+`pgrep kanata` shows a process, but typing on the split halves doesn't
+trigger any `LayerChange` events. Live-monitor with:
+```bash
+echo '{"RequestCurrentLayerName":{}}' | nc 127.0.0.1 5829
+# Then hold inner-right thumb. If you see `{"LayerChange":{"new":"nav"}}` → working.
+# If layer never changes → handles are stale, run `kanata-restart`.
+```
 
 ## 🔧 Config gotchas already fixed (don't reintroduce)
 
