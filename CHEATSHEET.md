@@ -1,81 +1,114 @@
 # Split Keyboard Cheatsheet
 
-One-page printable reference for the Dactyl 76 Vial layout.
+One-page printable reference for the Dactyl 76 Vial layout (v4).
 
-## Thumb cluster
+## Thumb clusters
 
+```text
+LEFT  (outer → inner):  Cmd   | Alt   | SYM-hold
+RIGHT (inner → outer):  NAV-hold | Spc | Sft
 ```
-LEFT (outer→inner):    Cmd     Backspace    [hold = SYM]
-RIGHT (inner→outer):   [hold = NAV]    Space    Enter/Shift
-```
 
-`Enter/Shift` = tap for Enter, hold for Shift.
+- **Alt is NEW in v4** on the left-middle thumb.
+- RIGHT-OUTER is plain Shift in v4 — no tap-hold timing.
+- Inner thumbs are local layer holds: left = symbols, right = navigation.
 
-## Modifier chords (BASE)
+## Modifier chords
 
-| Action                 | Combo                                                      |
-|------------------------|------------------------------------------------------------|
-| Cmd + letter           | hold LEFT-OUTER + tap letter (either hand)                 |
-| Capital                | hold RIGHT-OUTER (Shift) + tap letter                      |
-| Cmd+C / V / X / Z      | hold LEFT-OUTER + tap `c` / `v` / `x` / `z`                |
-| Redo (Cmd+Shift+Z)     | hold LEFT-OUTER + hold RIGHT-OUTER + tap `z`               |
-| Select arrow-by-arrow  | hold RIGHT-OUTER + hold RIGHT-INNER + tap `h`/`j`/`k`/`l`  |
-| Select word-by-word    | hold RIGHT-OUTER + hold RIGHT-INNER + tap `n` / `.`        |
+| What you want | Do this |
+|---|---|
+| Cmd + letter | Hold LEFT-OUTER + tap any letter |
+| Alt + key | Hold LEFT-MIDDLE + tap any key |
+| Shift + letter | Hold RIGHT-OUTER + tap letter |
+| Cmd + Shift + letter | Hold LEFT-OUTER + RIGHT-OUTER + tap letter |
+| Cmd + Opt + L (JetBrains reformat) | Hold LEFT-OUTER + LEFT-MIDDLE + tap `L` |
+| Alt + Enter (JetBrains intent action) | Hold LEFT-MIDDLE + hold RIGHT-INNER + tap `N` |
+| Shift + arrow (select) | Hold RIGHT-OUTER + hold RIGHT-INNER + tap `H/J/K/L` |
+| Word jump (Mac) | Hold LEFT-MIDDLE + hold RIGHT-INNER + tap `H/L` |
+| Word jump (Windows after PowerToys) | Hold LEFT-OUTER + hold RIGHT-INNER + tap `H/L` |
+| Backspace | Hold RIGHT-INNER + tap `;` |
+| Enter | Hold RIGHT-INNER + tap `N` (or your right pinky outer Enter, if firmware exposes one) |
 
 > On Windows install PowerToys with the remaps in `install/windows.md`;
-> after that, "Cmd" above = Ctrl, and word-jumps still work.
+> after that, “Cmd” above = Ctrl, and Windows word-jump uses LEFT-OUTER +
+> NAV arrow.
 
-## LEFT-SYM (hold left inner thumb)
+## LEFT-SYM layer
 
-```text
-┌────────┬────────┬────────┬────────┬────────┐
-│   F1   │   F2   │   F3   │   F4   │   F5   │
-├────────┼────────┼────────┼────────┼────────┤
-│   "    │   '    │   +    │   |    │   *    │
-├────────┼────────┼────────┼────────┼────────┤
-│   !    │   [    │   {    │   (    │   =    │
-├────────┼────────┼────────┼────────┼────────┤
-│   \    │   /    │   ?    │   -    │   &    │
-└────────┴────────┴────────┴────────┴────────┘
-```
-
-- All symbols are direct (no Shift chord needed).
-- Brackets mirror across hands: **`s/l = []`**, **`d/k = {}`**, **`f/j = ()`**.
-- For closing brackets, use the right hand — but they're not on a layer,
-  so just type them via outer pinky col or via the standard `]`/`}`/`)`
-  keys on your existing Vial layout.
-
-## RIGHT-NAV (hold right inner thumb)
+Hold **left inner thumb**.
 
 ```text
-┌────────┬────────┬────────┬────────┬────────┐
-│   F6   │   F7   │   F8   │   F9   │  F10   │
-├────────┼────────┼────────┼────────┼────────┤
-│  DocB  │  Home  │  PgUp  │  End   │  DocE  │
-├────────┼────────┼────────┼────────┼────────┤
-│   ←    │   ↓    │   ↑    │   →    │  Esc   │
-├────────┼────────┼────────┼────────┼────────┤
-│  Wrd←  │  Tab   │  PgDn  │  Wrd→  │   ─    │
-└────────┴────────┴────────┴────────┴────────┘
+┌────┬────┬────┬────┬────┐
+│ F1 │ F2 │ F3 │ F4 │ F5 │
+├────┼────┼────┼────┼────┤
+│ "  │ '  │ :  │ @  │ _  │
+├────┼────┼────┼────┼────┤
+│ !  │ [  │ {  │ (  │ =  │
+├────┼────┼────┼────┼────┤
+│ <  │ >  │ ]  │ )  │ }  │
+└────┴────┴────┴────┴────┘
 ```
 
-- Arrows on `h j k l` (Vim-style).
-- Page / line / doc navigation on the top alpha row.
-- Word jumps on `n` (left) and `.` (right).
-- Esc on `;` for modal editors. Tab on `m` for in-place indent.
+- Number row becomes F1–F5.
+- Quotes / colon / at / underscore are on the top alpha row.
+- Openers are on the home row; closers are below them.
+- Angles are `Z/X`; equals is `G`.
+
+## RIGHT-NAV layer
+
+Hold **right inner thumb**.
+
+```text
+┌──────┬──────┬──────┬──────┬──────┐
+│ F6   │ F7   │ F8   │ F9   │ F10  │
+├──────┼──────┼──────┼──────┼──────┤
+│ DocB │ Home │ PgUp │ End  │ DocE │
+├──────┼──────┼──────┼──────┼──────┤
+│ ←    │ ↓    │ ↑    │ →    │ Bspc │
+├──────┼──────┼──────┼──────┼──────┤
+│ Ent  │ Tab  │ F11  │ F12  │ Esc  │
+└──────┴──────┴──────┴──────┴──────┘
+```
+
+- Arrows stay on `H/J/K/L`.
+- Document begin/end are `Y/P`; Home/End/Page-Up are `U/O/I`.
+- Backspace is `;`; Enter is `N`; Tab is `M`; Esc is `/`.
+- F11/F12 are on `,`/`.` for debugger and IDE shortcuts.
+
+## v3 → v4 migration
+
+- Backspace moved from the left-middle thumb to RIGHT-NAV `;`.
+- Enter moved from right-outer tap-hold to RIGHT-NAV `N`.
+- Shift is no longer tap-hold; RIGHT-OUTER is plain Shift.
+- Alt/Option is new on LEFT-MIDDLE.
+- Word jumps use the dedicated Alt/Ctrl modifier plus RIGHT-NAV arrows.
+
+## Smoke test
+
+| Try | Expect |
+|---|---|
+| Hold left inner thumb + tap `Z` | `<` appears |
+| Hold left middle thumb alone + tap an arrow in an app with Alt-arrow behavior | Alt behavior fires |
+| Hold right inner thumb + tap `,` | F11 fires; test in a VS Code debug session |
+| Hold right inner first, then hold left middle + tap `N` | Alt+Enter fires; test JetBrains intent action |
 
 ## Daily patterns
 
-| Task                         | Move                                              |
-|------------------------------|---------------------------------------------------|
-| Copy a paragraph             | Hold RIGHT-OUTER+RIGHT-INNER, tap `j` for each line, then LEFT-OUTER + `c` |
-| Jump to start of file        | Hold RIGHT-INNER, tap `y` (DocB = Cmd+Up on Mac)  |
-| Comment one line (IDE-dep.)  | LEFT-OUTER + `/`  (Cmd+/ in most editors)         |
-| Type `{ }` for a block       | Hold left inner thumb, tap `d` then right pinky for `}` |
-| Save                         | LEFT-OUTER + `s`                                  |
-| Find                         | LEFT-OUTER + `f`                                  |
-| Switch tabs                  | LEFT-OUTER + RIGHT-OUTER + Tab? (use IDE shortcut)|
+| Task | Chord |
+|---|---|
+| Copy paragraph | RIGHT-OUTER + RIGHT-INNER, select with `J/K/H/L`, then LEFT-OUTER + `C` |
+| Jump to start of file | RIGHT-INNER + `Y` |
+| Jump to end of file | RIGHT-INNER + `P` |
+| Comment line | LEFT-OUTER + `/` |
+| Type `{ }` for a block | LEFT-INNER + `D`, then LEFT-INNER + `B` |
+| Backspace | RIGHT-INNER + `;` |
+| Enter | RIGHT-INNER + `N` |
+| JetBrains reformat | LEFT-OUTER + LEFT-MIDDLE + `L` |
+| JetBrains intent action | LEFT-MIDDLE + RIGHT-INNER + `N` |
 
-> No layered IDE Hyper chords in this build — use your editor's native
-> command palette (`Cmd+P` / `Cmd+Shift+P`) for actions that don't have a
-> direct shortcut.
+## Why the layers are split this way
+
+- Left hand owns symbols because code punctuation clusters well there.
+- Right hand owns navigation because `H/J/K/L` movement is already familiar.
+- Modifiers stay as real modifiers, so Cmd/Ctrl/Alt/Shift shortcuts work in
+  any app without a separate IDE-action layer.

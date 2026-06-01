@@ -1,258 +1,286 @@
 # KEYMAP
 
 > Per-half Vial-native keymap for the Dactyl 76 split keyboard.
-> Each half is configured independently in Vial — there is no host-side
-> software bridging the halves. See `README.md` for the rationale and
-> `vial/SETUP.md` for the click-by-click Vial entry guide.
+> **v4** replaces v3 with a dev-workflow layout: dedicated Alt/Option,
+> plain Shift, debugger function keys, and programming symbols. Each half is
+> configured independently in Vial — there is no host-side software bridging
+> the halves. Each half is an independent USB device, so the halves cannot
+> share layer state. See `README.md` for the design rationale and
+> `CHEATSHEET.md` for the daily-use view.
 
 ## Notation
 
-Vial's keycode picker uses **QMK keycode names**. Where a key produces a
-common symbol, this doc shows both the symbol and the canonical name:
+- `KC_*` — normal QMK/Vial keycode.
+- `MO(1)` — momentary layer hold, local to that half only.
+- `LGUI(kc)` — send key with left GUI/Cmd held.
+- `LCTL`, `LALT`, `LSFT` — Ctrl, Alt/Option, Shift modifiers.
+- `_______` / `KC_TRNS` — transparent, fall through to base layer.
 
-- `MO(n)` — momentary layer: hold to activate layer `n` (on this half only).
-- `MT(mod, kc)` — mod-tap: tap emits `kc`, hold emits the modifier `mod`.
-- `LGUI` / `LCTL` / `LALT` / `LSFT` — left-side modifiers (Cmd / Ctrl / Opt / Shift on macOS).
-- `LGUI(kc)` — emits Cmd+`kc` as a single keypress.
-- `_______` / `KC_TRNS` — transparent: falls through to the layer below.
+## v4 highlights
+
+- **Dedicated Alt/Option thumb** on LEFT-MIDDLE (`KC_LALT`) — new in v4,
+  replacing the v3 Backspace thumb.
+- **Dedicated Shift thumb** on RIGHT-OUTER (`KC_LSFT`) — plain Shift, no
+  tap-hold timing dependency.
+- **F11/F12 on RIGHT-NAV** for debugger / IDE workflows.
+- **Programming symbols are direct on LEFT-SYM**: closing brackets, angles,
+  colon, at-sign, and underscore are all one layer hold away.
+- **Backspace and Enter live on RIGHT-NAV**: `;` = Backspace, `N` = Enter.
+- v3's firmware word-jump macros are dropped; word jumps are now normal
+  modifier chords using the dedicated Alt/Ctrl modifier plus NAV arrows.
 
 ## Physical layout reference
 
-Each half is a 5-column × 4-row letter grid plus a 3-key thumb cluster.
-The outer pinky column (Tab, Shift, dash, etc.) is **not** changed by this
-keymap — leave whatever your firmware ships with there.
+Each half is a 5-column × 4-row letter grid plus one number row and a 3-key
+thumb cluster. The outer pinky column (Tab, Shift, dash, etc.) is not changed
+by this keymap and can remain whatever your current firmware exposes.
+
+Left half:
 
 ```text
-left half                                            right half
-┌────┬────┬────┬────┬────┐                ┌────┬────┬────┬────┬────┐
-│ 1  │ 2  │ 3  │ 4  │ 5  │                │ 6  │ 7  │ 8  │ 9  │ 0  │
-├────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┤
-│ Q  │ W  │ E  │ R  │ T  │                │ Y  │ U  │ I  │ O  │ P  │
-├────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┤
-│ A  │ S  │ D  │ F  │ G  │                │ H  │ J  │ K  │ L  │ ;  │
-├────┼────┼────┼────┼────┤                ├────┼────┼────┼────┼────┤
-│ Z  │ X  │ C  │ V  │ B  │                │ N  │ M  │ ,  │ .  │ /  │
-└────┴────┴────┴────┴────┘                └────┴────┴────┴────┴────┘
-       thumbs (left, outer→inner):              thumbs (right, inner→outer):
-           ┌────┬────┬────┐                       ┌────┬────┬────┐
-           │Cmd │Bspc│SYM │                       │NAV │Spc │Ent │
-           └────┴────┴────┘                       └────┴────┴────┘
+┌────┬────┬────┬────┬────┐
+│ 1  │ 2  │ 3  │ 4  │ 5  │
+├────┼────┼────┼────┼────┤
+│ Q  │ W  │ E  │ R  │ T  │
+├────┼────┼────┼────┼────┤
+│ A  │ S  │ D  │ F  │ G  │
+├────┼────┼────┼────┼────┤
+│ Z  │ X  │ C  │ V  │ B  │
+└────┴────┴────┴────┴────┘
+        [Cmd] [Alt] [SYM]
+```
+
+Right half:
+
+```text
+┌────┬────┬────┬────┬────┐
+│ 6  │ 7  │ 8  │ 9  │ 0  │
+├────┼────┼────┼────┼────┤
+│ Y  │ U  │ I  │ O  │ P  │
+├────┼────┼────┼────┼────┤
+│ H  │ J  │ K  │ L  │ ;  │
+├────┼────┼────┼────┼────┤
+│ N  │ M  │ ,  │ .  │ /  │
+└────┴────┴────┴────┴────┘
+[NAV] [Spc] [Sft]
 ```
 
 ## Layer plan
 
-Two layers per half. Layer numbers are **local to each half** — Vial only
-sees one half at a time, so "layer 1" on the left half is unrelated to
-"layer 1" on the right half.
-
-| Half  | Layer | Trigger                       | Purpose                          |
-|-------|-------|-------------------------------|----------------------------------|
-| Left  | 0     | always (BASE)                 | QWERTY typing + dedicated Cmd thumb |
-| Left  | 1     | hold left INNER thumb         | Left-hand programming symbols + F1–F5 |
-| Right | 0     | always (BASE)                 | QWERTY typing + Space + Enter/Shift thumb |
-| Right | 1     | hold right INNER thumb        | Arrows, page/word/doc navigation + F6–F10 |
+| Half | Layer | Activation | Purpose |
+|---|---:|---|---|
+| Left | 0 | Always | Left QWERTY half, number row, Cmd + Alt thumbs |
+| Left | 1 | Hold left inner thumb | LEFT-SYM: programming symbols + F1–F5 |
+| Right | 0 | Always | Right QWERTY half, number row, Space + Shift thumbs |
+| Right | 1 | Hold right inner thumb | RIGHT-NAV: navigation, Backspace/Enter, F6–F12 |
 
 ## How modifier chords work without a global FN layer
 
-Modifiers live on **dedicated thumb keys**, not on letter tap-holds. That
-means combining a modifier with a key on the **other half** works at the
-USB/OS level — the modifier half emits `LGUI down`, the letter half emits
-the letter, the OS combines them. No firmware coordination needed.
+Because the halves cannot share layer state, layer holds are intentionally
+local: left inner thumb only changes the left half, and right inner thumb only
+changes the right half. Cross-half shortcuts are built from normal OS-visible
+modifiers instead.
 
-| Action               | Keys                                                       |
-|----------------------|------------------------------------------------------------|
-| Cmd+C / Cmd+V / etc. | hold LEFT-OUTER thumb (Cmd), tap `c` / `v` / …             |
-| Cmd+ anything cross-hand (e.g. Cmd+P) | hold LEFT-OUTER thumb (Cmd), tap right-hand letter |
-| Capital letter       | hold RIGHT-OUTER thumb (Shift), tap letter                 |
-| Shift+arrow (select) | hold RIGHT-OUTER thumb (Shift) + hold RIGHT-INNER (NAV) + tap `h`/`j`/`k`/`l` |
-| Redo (Cmd+Shift+Z)   | hold LEFT-OUTER (Cmd) + hold RIGHT-OUTER (Shift) + tap `z` |
+| Action | Physical chord |
+|---|---|
+| Cmd + letter | Hold LEFT-OUTER + tap any letter |
+| Alt + key | Hold LEFT-MIDDLE + tap any key |
+| Shift + letter | Hold RIGHT-OUTER + tap letter |
+| Cmd + Shift + letter | Hold LEFT-OUTER + RIGHT-OUTER + tap letter |
+| Cmd + Opt + L | Hold LEFT-OUTER + LEFT-MIDDLE + tap `L` |
+| Alt + Enter | Hold LEFT-MIDDLE + hold RIGHT-INNER + tap `N` |
+| Shift + arrow | Hold RIGHT-OUTER + hold RIGHT-INNER + tap `H/J/K/L` |
+| Word jump (Mac) | Hold LEFT-MIDDLE + hold RIGHT-INNER + tap `H/L` |
+| Word jump (Windows after PowerToys) | Hold LEFT-OUTER + hold RIGHT-INNER + tap `H/L` |
+| Backspace | Hold RIGHT-INNER + tap `;` |
+| Enter | Hold RIGHT-INNER + tap `N` (or your right pinky outer Enter, if firmware exposes one) |
 
-The RIGHT-OUTER thumb is **tap-hold**: a quick tap sends Enter; a hold
-sends Shift. This is the only tap-hold in the design; it lives on a thumb
-(not a letter) where timing is unambiguous.
+RIGHT-OUTER is plain `KC_LSFT` in v4. Enter moved to RIGHT-NAV `N`, and
+Backspace moved to RIGHT-NAV `;`, so there is no tap-hold timing dependency.
 
-## 🔹 LEFT half — Layer 0 (BASE)
+## LEFT half — Layer 0
 
-```text
-┌────────┬────────┬────────┬────────┬────────┐
-│   1    │   2    │   3    │   4    │   5    │
-├────────┼────────┼────────┼────────┼────────┤
-│   Q    │   W    │   E    │   R    │   T    │
-├────────┼────────┼────────┼────────┼────────┤
-│   A    │   S    │   D    │   F    │   G    │
-├────────┼────────┼────────┼────────┼────────┤
-│   Z    │   X    │   C    │   V    │   B    │
-└────────┴────────┴────────┴────────┴────────┘
-            ┌─────┬─────┬─────┐
-            │ Cmd │Bspc │ SYM │     ← thumbs: outer, middle, inner
-            └─────┴─────┴─────┘
-```
-
-| Physical key       | Vial keycode  | Notes                                  |
-|--------------------|---------------|----------------------------------------|
-| 1 – 0              | `KC_1` – `KC_0`| standard number row                   |
-| Q W E R T          | `KC_Q` `KC_W` `KC_E` `KC_R` `KC_T` | standard QWERTY |
-| A S D F G          | `KC_A` `KC_S` `KC_D` `KC_F` `KC_G` | **NO home-row mods** (intentional — keeps fast typing reliable) |
-| Z X C V B          | `KC_Z` `KC_X` `KC_C` `KC_V` `KC_B` | standard QWERTY |
-| LEFT-OUTER thumb   | `KC_LGUI`     | Cmd on macOS. On Windows after the PowerToys remap (see `install/windows.md`), this becomes LCtrl. |
-| LEFT-MIDDLE thumb  | `KC_BSPC`     | Backspace                              |
-| LEFT-INNER thumb   | `MO(1)`       | Hold for LEFT-SYM layer                |
-
-## 🔹 LEFT half — Layer 1 (LEFT-SYM)
-
-Hold the **left inner thumb** to activate. All keys produce direct
-unshifted output — no chording with Shift needed.
+Base layer is ordinary left-hand QWERTY.
 
 ```text
-┌────────┬────────┬────────┬────────┬────────┐
-│   F1   │   F2   │   F3   │   F4   │   F5   │
-├────────┼────────┼────────┼────────┼────────┤
-│   "    │   '    │   +    │   |    │   *    │
-├────────┼────────┼────────┼────────┼────────┤
-│   !    │   [    │   {    │   (    │   =    │
-├────────┼────────┼────────┼────────┼────────┤
-│   \    │   /    │   ?    │   -    │   &    │
-└────────┴────────┴────────┴────────┴────────┘
-            ┌─────┬─────┬─────┐
-            │  ─  │  ─  │HELD │
-            └─────┴─────┴─────┘
+┌────┬────┬────┬────┬────┐
+│ 1  │ 2  │ 3  │ 4  │ 5  │
+├────┼────┼────┼────┼────┤
+│ Q  │ W  │ E  │ R  │ T  │
+├────┼────┼────┼────┼────┤
+│ A  │ S  │ D  │ F  │ G  │
+├────┼────┼────┼────┼────┤
+│ Z  │ X  │ C  │ V  │ B  │
+└────┴────┴────┴────┴────┘
+        [Cmd] [Alt] [SYM]
 ```
 
-| Physical key       | Symbol | Vial keycode  | Equivalent (manual)                 |
-|--------------------|--------|---------------|-------------------------------------|
-| 1                  | F1     | `KC_F1`       |                                     |
-| 2                  | F2     | `KC_F2`       |                                     |
-| 3                  | F3     | `KC_F3`       |                                     |
-| 4                  | F4     | `KC_F4`       |                                     |
-| 5                  | F5     | `KC_F5`       |                                     |
-| Q                  | `"`    | `KC_DQUO`     | `LSFT(KC_QUOT)`                     |
-| W                  | `'`    | `KC_QUOT`     |                                     |
-| E                  | `+`    | `KC_PLUS`     | `LSFT(KC_EQL)`                      |
-| R                  | `\|`   | `KC_PIPE`     | `LSFT(KC_BSLS)`                     |
-| T                  | `*`    | `KC_ASTR`     | `LSFT(KC_8)`                        |
-| A                  | `!`    | `KC_EXLM`     | `LSFT(KC_1)`                        |
-| S                  | `[`    | `KC_LBRC`     |                                     |
-| D                  | `{`    | `KC_LCBR`     | `LSFT(KC_LBRC)`                     |
-| F                  | `(`    | `KC_LPRN`     | `LSFT(KC_9)`                        |
-| G                  | `=`    | `KC_EQL`      |                                     |
-| Z                  | `\`    | `KC_BSLS`     |                                     |
-| X                  | `/`    | `KC_SLSH`     |                                     |
-| C                  | `?`    | `KC_QUES`     | `LSFT(KC_SLSH)`                     |
-| V                  | `-`    | `KC_MINS`     |                                     |
-| B                  | `&`    | `KC_AMPR`     | `LSFT(KC_7)`                        |
-| LEFT-OUTER thumb   |        | `_______`     | transparent → still emits Cmd       |
-| LEFT-MIDDLE thumb  |        | `_______`     | transparent → still emits Backspace |
-| LEFT-INNER thumb   |        | `_______`     | held (you're already on this layer) |
+| Position | Keycode | Notes |
+|---|---|---|
+| 1–5 | `KC_1` – `KC_5` | Number row |
+| Q W E R T | `KC_Q` `KC_W` `KC_E` `KC_R` `KC_T` | Normal letters |
+| A S D F G | `KC_A` `KC_S` `KC_D` `KC_F` `KC_G` | Normal letters |
+| Z X C V B | `KC_Z` `KC_X` `KC_C` `KC_V` `KC_B` | Normal letters |
+| Thumb outer | `KC_LGUI` | Cmd on Mac. On Windows, PowerToys remaps to LCtrl. |
+| Thumb middle | `KC_LALT` | Alt/Option. New in v4. |
+| Thumb inner | `MO(1)` | Hold for LEFT-SYM. |
 
-### Mnemonics
+## LEFT half — Layer 1
 
-- **Mirrored brackets** with the right half: `S/L = []`, `D/K = {}`, `F/J = ()`.
-- **Closing brackets** (`] } )`) live on the right half — see RIGHT-SYM below.
-- **Top row letters** are the "shifted-number" symbols rotated up: `" ' + | *`.
-- **Bottom row** has the less-frequent symbols: `\ / ? - &`.
-
-## 🔹 RIGHT half — Layer 0 (BASE)
+Hold left inner thumb for LEFT-SYM.
 
 ```text
-┌────────┬────────┬────────┬────────┬────────┐
-│   6    │   7    │   8    │   9    │   0    │
-├────────┼────────┼────────┼────────┼────────┤
-│   Y    │   U    │   I    │   O    │   P    │
-├────────┼────────┼────────┼────────┼────────┤
-│   H    │   J    │   K    │   L    │   ;    │
-├────────┼────────┼────────┼────────┼────────┤
-│   N    │   M    │   ,    │   .    │   /    │
-└────────┴────────┴────────┴────────┴────────┘
-            ┌─────┬─────┬─────┐
-            │ NAV │ Spc │ Ent │     ← thumbs: inner, middle, outer
-            └─────┴─────┴─────┘     (outer = tap Enter, hold Shift)
+┌────┬────┬────┬────┬────┐
+│ F1 │ F2 │ F3 │ F4 │ F5 │
+├────┼────┼────┼────┼────┤
+│ "  │ '  │ :  │ @  │ _  │
+├────┼────┼────┼────┼────┤
+│ !  │ [  │ {  │ (  │ =  │
+├────┼────┼────┼────┼────┤
+│ <  │ >  │ ]  │ )  │ }  │
+└────┴────┴────┴────┴────┘
+        [ ─ ] [ ─ ] [ ─ ]
 ```
 
-| Physical key        | Vial keycode                | Notes                                    |
-|---------------------|-----------------------------|------------------------------------------|
-| 6 – 0               | `KC_6` – `KC_0`             | standard number row                      |
-| Y U I O P           | `KC_Y` `KC_U` `KC_I` `KC_O` `KC_P` | standard QWERTY                    |
-| H J K L             | `KC_H` `KC_J` `KC_K` `KC_L` | standard QWERTY                          |
-| `;`                 | `KC_SCLN`                   |                                          |
-| N M , . /           | `KC_N` `KC_M` `KC_COMM` `KC_DOT` `KC_SLSH` |                          |
-| RIGHT-INNER thumb   | `MO(1)`                     | Hold for RIGHT-NAV layer                 |
-| RIGHT-MIDDLE thumb  | `KC_SPC`                    | Space                                    |
-| RIGHT-OUTER thumb   | `MT(MOD_LSFT, KC_ENT)`      | **tap = Enter, hold = Shift**            |
+Thumbs on Layer 1 are all `KC_TRNS` / transparent.
 
-> The RIGHT-OUTER tap-hold is the only timing-sensitive key in the design.
-> A quick tap (< ~200ms) sends Enter. Hold past that to use as Shift.
-> Configure Vial → QMK Settings → Tapping Term: 200 ms,
-> Permissive Hold: on, Hold On Other Key Press: on.
+| Position | Output | Vial keycode | Equivalent manual chord |
+|---|---|---|---|
+| 1 | `F1` | `KC_F1` | — |
+| 2 | `F2` | `KC_F2` | — |
+| 3 | `F3` | `KC_F3` | — |
+| 4 | `F4` | `KC_F4` | — |
+| 5 | `F5` | `KC_F5` | — |
+| Q | `"` | `KC_DQUO` | `LSFT(KC_QUOT)` |
+| W | `'` | `KC_QUOT` | `KC_QUOT` |
+| E | `:` | `KC_COLN` | `LSFT(KC_SCLN)` |
+| R | `@` | `KC_AT` | `LSFT(KC_2)` |
+| T | `_` | `KC_UNDS` | `LSFT(KC_MINS)` |
+| A | `!` | `KC_EXLM` | `LSFT(KC_1)` |
+| S | `[` | `KC_LBRC` | `KC_LBRC` |
+| D | `{` | `KC_LCBR` | `LSFT(KC_LBRC)` |
+| F | `(` | `KC_LPRN` | `LSFT(KC_9)` |
+| G | `=` | `KC_EQL` | `KC_EQL` |
+| Z | `<` | `KC_LT` | `LSFT(KC_COMM)` |
+| X | `>` | `KC_GT` | `LSFT(KC_DOT)` |
+| C | `]` | `KC_RBRC` | `KC_RBRC` |
+| V | `)` | `KC_RPRN` | `LSFT(KC_0)` |
+| B | `}` | `KC_RCBR` | `LSFT(KC_RBRC)` |
+| Thumb outer | `KC_TRNS` | `KC_TRNS` | transparent |
+| Thumb middle | `KC_TRNS` | `KC_TRNS` | transparent |
+| Thumb inner | `KC_TRNS` | `KC_TRNS` | transparent while held |
 
-## 🔹 RIGHT half — Layer 1 (RIGHT-NAV)
+## Mnemonics
 
-Hold the **right inner thumb** to activate.
+- Number row becomes F1–F5.
+- Quotes and common punctuation sit on the top alpha row: `" ' : @ _`.
+- Openers are on the home row and closers are below them: `[ { (` / `] ) }`.
+- Angles are on `Z/X`; equals stays under the index finger on `G`.
+- Symbols are direct outputs — no Shift chording required.
+
+## RIGHT half — Layer 0
+
+Base layer is ordinary right-hand QWERTY.
 
 ```text
-┌────────┬────────┬────────┬────────┬────────┐
-│   F6   │   F7   │   F8   │   F9   │  F10   │
-├────────┼────────┼────────┼────────┼────────┤
-│  DocB  │  Home  │  PgUp  │  End   │  DocE  │
-├────────┼────────┼────────┼────────┼────────┤
-│   ←    │   ↓    │   ↑    │   →    │  Esc   │
-├────────┼────────┼────────┼────────┼────────┤
-│  Wrd←  │  Tab   │  PgDn  │  Wrd→  │   ─    │
-└────────┴────────┴────────┴────────┴────────┘
-            ┌─────┬─────┬─────┐
-            │HELD │  ─  │  ─  │
-            └─────┴─────┴─────┘
+┌────┬────┬────┬────┬────┐
+│ 6  │ 7  │ 8  │ 9  │ 0  │
+├────┼────┼────┼────┼────┤
+│ Y  │ U  │ I  │ O  │ P  │
+├────┼────┼────┼────┼────┤
+│ H  │ J  │ K  │ L  │ ;  │
+├────┼────┼────┼────┼────┤
+│ N  │ M  │ ,  │ .  │ /  │
+└────┴────┴────┴────┴────┘
+[NAV] [Spc] [Sft]
 ```
 
-| Physical key        | Action            | Vial keycode             | Notes                                              |
-|---------------------|-------------------|--------------------------|----------------------------------------------------|
-| 6                   | F6                | `KC_F6`                  |                                                    |
-| 7                   | F7                | `KC_F7`                  |                                                    |
-| 8                   | F8                | `KC_F8`                  |                                                    |
-| 9                   | F9                | `KC_F9`                  |                                                    |
-| 0                   | F10               | `KC_F10`                 |                                                    |
-| Y                   | Doc Begin         | `LGUI(KC_UP)`            | Cmd+Up on Mac = top of document. On Windows after PowerToys, becomes Ctrl+Up — remap to Ctrl+Home in PowerToys for parity. |
-| U                   | Home              | `KC_HOME`                | line begin on most platforms; doc top on some Mac apps. |
-| I                   | Page Up           | `KC_PGUP`                |                                                    |
-| O                   | End               | `KC_END`                 |                                                    |
-| P                   | Doc End           | `LGUI(KC_DOWN)`          | Cmd+Down on Mac.                                   |
-| H                   | ←                 | `KC_LEFT`                |                                                    |
-| J                   | ↓                 | `KC_DOWN`                |                                                    |
-| K                   | ↑                 | `KC_UP`                  |                                                    |
-| L                   | →                 | `KC_RIGHT`               |                                                    |
-| `;`                 | Esc               | `KC_ESC`                 | handy for modal editors                            |
-| N                   | Word Left         | `LALT(KC_LEFT)`          | Opt+Left on Mac. On Windows, PowerToys remap turns this into Ctrl+Left. |
-| M                   | Tab               | `KC_TAB`                 | when navigating, lets you indent without leaving the layer |
-| `,`                 | Page Down         | `KC_PGDN`                |                                                    |
-| `.`                 | Word Right        | `LALT(KC_RIGHT)`         | mirror of Word Left                                |
-| `/`                 | (transparent)     | `_______`                | falls through to `/` on BASE                       |
-| RIGHT-INNER thumb   |                   | `_______`                | held (you're already on this layer)                |
-| RIGHT-MIDDLE thumb  |                   | `_______`                | still emits Space                                  |
-| RIGHT-OUTER thumb   |                   | `_______`                | still emits Enter / Shift                          |
+| Position | Keycode | Notes |
+|---|---|---|
+| 6–0 | `KC_6` – `KC_0` | Number row |
+| Y U I O P | `KC_Y` `KC_U` `KC_I` `KC_O` `KC_P` | Normal letters |
+| H J K L ; | `KC_H` `KC_J` `KC_K` `KC_L` `KC_SCLN` | Normal letters / semicolon |
+| N M , . / | `KC_N` `KC_M` `KC_COMM` `KC_DOT` `KC_SLSH` | Normal letters / punctuation |
+| Thumb inner | `MO(1)` | Hold for RIGHT-NAV. |
+| Thumb middle | `KC_SPC` | Space. |
+| Thumb outer | `KC_LSFT` | Plain Shift. New in v4. |
 
-### Selection workflow
+## RIGHT half — Layer 1
 
-```
-Hold RIGHT-OUTER (Shift) + Hold RIGHT-INNER (NAV) + tap h/j/k/l
-                                                    └── one or more
+Hold right inner thumb for RIGHT-NAV.
+
+```text
+┌──────┬──────┬──────┬──────┬──────┐
+│ F6   │ F7   │ F8   │ F9   │ F10  │
+├──────┼──────┼──────┼──────┼──────┤
+│ DocB │ Home │ PgUp │ End  │ DocE │
+├──────┼──────┼──────┼──────┼──────┤
+│ ←    │ ↓    │ ↑    │ →    │ Bspc │
+├──────┼──────┼──────┼──────┼──────┤
+│ Ent  │ Tab  │ F11  │ F12  │ Esc  │
+└──────┴──────┴──────┴──────┴──────┘
+[ ─ ]  [ ─ ]  [ ─ ]
 ```
 
-All three keys are on the right half so timing is reliable. Tap any arrow
-to extend the selection one position; combine with `LALT` (`n`/`.`) for
-word-by-word selection by adding Shift via the right outer thumb.
+Thumbs on Layer 1 are all `KC_TRNS` / transparent.
+
+| Position | Function | Vial keycode | Notes |
+|---|---|---|---|
+| 6 | F6 | `KC_F6` | Function row |
+| 7 | F7 | `KC_F7` | Function row |
+| 8 | F8 | `KC_F8` | Function row |
+| 9 | F9 | `KC_F9` | Function row |
+| 0 | F10 | `KC_F10` | Function row |
+| Y | Document begin | `LGUI(KC_UP)` | Cmd+↑ on Mac |
+| U | Home | `KC_HOME` | Line begin |
+| I | Page Up | `KC_PGUP` | Page up |
+| O | End | `KC_END` | Line end |
+| P | Document end | `LGUI(KC_DOWN)` | Cmd+↓ on Mac |
+| H | Left arrow | `KC_LEFT` | Vim-style arrows |
+| J | Down arrow | `KC_DOWN` | Vim-style arrows |
+| K | Up arrow | `KC_UP` | Vim-style arrows |
+| L | Right arrow | `KC_RGHT` | Vim-style arrows |
+| ; | Backspace | `KC_BSPC` | New position in v4 |
+| N | Enter | `KC_ENT` | New position in v4 |
+| M | Tab | `KC_TAB` | Tab |
+| , | F11 | `KC_F11` | Debug / IDE key |
+| . | F12 | `KC_F12` | Debug / IDE key |
+| / | Escape | `KC_ESC` | Relocated from `;` |
+| Thumb inner | `KC_TRNS` | `KC_TRNS` | transparent while held |
+| Thumb middle | `KC_TRNS` | `KC_TRNS` | transparent → Space |
+| Thumb outer | `KC_TRNS` | `KC_TRNS` | transparent → Shift |
+
+## Selection workflow
+
+Right-hand NAV keeps movement on `H/J/K/L` while the right thumb supplies Shift.
+
+- Move cursor: hold RIGHT-INNER, tap `H/J/K/L`.
+- Select by character / line: hold RIGHT-OUTER + RIGHT-INNER, tap
+  `H/J/K/L`.
+- Word jump on Mac: hold LEFT-MIDDLE + RIGHT-INNER, tap `H/L`.
+- Word jump on Windows after PowerToys: hold LEFT-OUTER + RIGHT-INNER,
+  tap `H/L`.
+- Backspace: hold RIGHT-INNER, tap `;`.
+- Enter: hold RIGHT-INNER, tap `N`.
+
+This avoids same-half layer sharing assumptions: the right half handles NAV,
+while left-hand modifiers remain ordinary OS modifiers.
 
 ## Cross-platform notes
 
-The firmware emits **Mac-native** keycodes (`LGUI` = Cmd, `LALT` = Opt).
-This works out of the box on macOS. For Windows, install
-[PowerToys](https://learn.microsoft.com/windows/powertoys/install) and
-configure Keyboard Manager with the remaps listed in
-`install/windows.md`. Without those remaps, on Windows:
+The firmware emits Mac-native keycodes:
 
-- LGUI shortcuts (Cmd+C, etc.) trigger the Win key — generally not what you want.
-- `LALT(KC_LEFT)` / `LALT(KC_RIGHT)` invoke browser-back / forward, not word jump.
-- `LGUI(KC_UP)` / `LGUI(KC_DOWN)` invoke Win-key shortcuts.
+- `KC_LGUI` is Cmd on macOS.
+- `KC_LALT` is Option/Alt on macOS.
+- `LGUI(KC_UP)` / `LGUI(KC_DOWN)` are document begin/end on macOS.
 
-If the PowerToys trade-offs (losing native Alt+Left for browser-back,
-giving up LWin shortcuts) bother you, the alternative is to maintain a
-separate Vial layout for Windows — see `install/windows.md` for the
-suggested per-OS overrides.
+On Windows, install the PowerToys Keyboard Manager remaps from
+`install/windows.md`. The important table remaps `Win` to `Ctrl`, keeps the
+Mac-style document shortcuts usable, and redirects browser-style Alt+Arrow
+shortcuts to Ctrl+Arrow where needed.
+
+Without PowerToys on Windows:
+
+- `KC_LGUI` triggers the Windows key instead of Ctrl.
+- `LGUI(KC_UP)` / `LGUI(KC_DOWN)` trigger Windows snap/minimize shortcuts.
+- Word jumps should use the post-PowerToys recipe above, not a firmware macro.

@@ -1,10 +1,14 @@
 # Windows install — Dactyl 76 with Vial (+ PowerToys for shortcut parity)
 
 The Vial keymap is the same on every OS, but the firmware emits
-**Mac-native** keycodes (Cmd via `LGUI`, Opt via `LALT`). On Windows you
-install one extra app — PowerToys — and remap a handful of shortcuts so
-the layout behaves the way macOS users expect: Cmd-C copies, word jumps
-work, etc.
+**Mac-native** keycodes (Cmd via `LGUI`, Opt via `LALT`). In v4 you also
+have a dedicated Alt on a left thumb. On Windows you install one extra app —
+PowerToys — so Cmd-style shortcuts become Ctrl-style shortcuts, and doc
+jumps match macOS behavior.
+
+Word-jump is now natively typeable on Windows: after the PowerToys remap,
+the keyboard's Cmd thumb becomes Ctrl, so hold left-outer + tap left/right
+arrow (`h` / `l` on NAV) = Ctrl+arrow = word-jump.
 
 > Tested on Windows 10 22H2 and Windows 11 24H2 (x64).
 
@@ -42,37 +46,34 @@ Or download the installer from
 
 ## 5. Configure PowerToys Keyboard Manager
 
-Open **PowerToys → Keyboard Manager → Remap a shortcut**.
+Open **PowerToys → Keyboard Manager**.
 
-Add the following shortcut remaps **one at a time** (use the "+" to add
-each row). After all are added, click **OK** to save.
+Add these remaps **one at a time** (use the "+" to add each row). After all
+are added, click **OK** to save.
 
-| Original shortcut | New shortcut    | Purpose                          |
-|-------------------|-----------------|----------------------------------|
-| `Win`             | `Ctrl`          | Cmd-style shortcuts → Ctrl-* on Windows. Use the "Remap a key" tab for this single-key remap. |
-| `Alt + Left`      | `Ctrl + Left`   | Word jump left (was browser back) |
-| `Alt + Right`     | `Ctrl + Right`  | Word jump right (was browser forward) |
-| `Ctrl + Up`       | `Ctrl + Home`   | Doc top (after Win→Ctrl swap, the firmware's LGUI+Up arrives as Ctrl+Up) |
-| `Ctrl + Down`     | `Ctrl + End`    | Doc bottom                       |
+| Original | New | Purpose |
+|----------|-----|---------|
+| `Win`   | `Ctrl` | Cmd-style shortcuts → Ctrl-* on Windows. Use the **Remap a key** tab for this single-key remap. |
+| `Ctrl + Up` | `Ctrl + Home` | Doc top (after Win→Ctrl swap, the firmware's `LGUI(KC_UP)` arrives as Ctrl+Up). Use **Remap a shortcut**. |
+| `Ctrl + Down` | `Ctrl + End` | Doc bottom. Use **Remap a shortcut**. |
 
-> The `Win → Ctrl` row goes in the **Remap a key** tab (top of Keyboard
-> Manager). The four `Alt+`/`Ctrl+` rows go in the **Remap a shortcut**
-> tab.
+That's it for v4. Do **not** remap `Alt+Left` / `Alt+Right`; the dedicated
+Alt thumb should stay real Alt, and word-jump now comes from Ctrl+arrow.
 
 ### Trade-offs
 
 After applying these remaps:
 
 - ✅ Cmd-C/V/X/Z from the Dactyl now triggers Ctrl-C/V/X/Z on Windows.
-- ✅ Word jumps on the NAV layer (`n` / `.`) work as expected.
+- ✅ Word jumps are native: hold left outer (now Ctrl) + NAV left/right.
 - ✅ Doc jumps (`y` / `p`) jump to start / end of document.
+- ✅ Real Alt is still available from the left-middle thumb, so Alt+Left
+  browser-back and Alt+letter shortcuts still work.
 - ❌ The **Windows key on the Dactyl** no longer triggers Win-key
   shortcuts (Win+E, Win+R, Win+L, Win+Tab). Use the Win key on your
   laptop keyboard for these instead.
-- ❌ **Browser Back via Alt+Left** stops working. Use the browser's
-  back button or `Backspace` (in some browsers).
 
-If those trade-offs are dealbreakers, see the **Alternative: separate
+If that trade-off is a dealbreaker, see the **Alternative: separate
 Windows layout** section at the bottom.
 
 ## 6. Smoke test
@@ -83,29 +84,31 @@ In any text editor:
 |--------------------------------------------------|---------------------------------|
 | Hold left outer thumb + tap `c` (with text selected) | Text is copied              |
 | Hold right inner + tap `j`                       | Cursor moves down               |
-| Hold right inner + tap `n`                       | Cursor jumps one word left      |
+| Hold left outer + hold right inner + tap `h` / `l` | Cursor jumps one word left / right |
 | Hold right inner + tap `y`                       | Cursor jumps to document top    |
+| Hold right inner + tap `;`                       | Backspace deletes a character   |
+| Hold right inner + tap `,`                       | F11 fires                       |
 | Hold right outer + tap `a`                       | Capital `A`                     |
-| Quick tap right outer                            | Newline                         |
+| Hold left middle + hold right inner + tap `h`    | Alt+Left fires (browser back in many browsers) |
 
 ---
 
 ## Alternative: separate Windows layout (no PowerToys)
 
 If you'd rather not install PowerToys and don't mind maintaining two
-Vial layouts, you can build a Windows-native layout:
+Vial layouts, you can build a Windows-native layout. This is a power-user
+option, not necessary for v4 if PowerToys is acceptable.
 
 1. Open Vial on Windows.
 2. **File → Load** your current Mac layout.
-3. Replace every `LGUI` with `LCTL`:
+3. Replace the Cmd thumb with Ctrl:
    - LEFT-OUTER thumb (BASE): change `KC_LGUI` → `KC_LCTL`.
+4. Replace the doc-jump wrappers:
    - RIGHT-NAV `y`: change `LGUI(KC_UP)` → `LCTL(KC_HOME)`.
    - RIGHT-NAV `p`: change `LGUI(KC_DOWN)` → `LCTL(KC_END)`.
-4. Replace word-jump LALT with LCTL:
-   - RIGHT-NAV `n`: change `LALT(KC_LEFT)` → `LCTL(KC_LEFT)`.
-   - RIGHT-NAV `.`: change `LALT(KC_RIGHT)` → `LCTL(KC_RIGHT)`.
-5. Right outer thumb: change `MT(MOD_LSFT, KC_ENT)` — no change needed,
-   Shift is the same on both OSes.
+5. Leave the dedicated Alt and Shift thumbs alone:
+   - LEFT-MIDDLE thumb stays `KC_LALT`.
+   - RIGHT-OUTER thumb stays `KC_LSFT`.
 6. **File → Save Current Layout As…** → `dactyl_76_left_windows.vil`.
 
 Now you have two `.vil` files; load the appropriate one whenever you

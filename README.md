@@ -1,6 +1,6 @@
 # Dactyl 76 — Split-Keyboard Vial Setup
 
-A pure-firmware Vial config for the **Dactyl 76 from Alibaba** — the
+A pure-firmware v4 Vial config for the **Dactyl 76 from Alibaba** — the
 split keyboard whose halves each enumerate as their own USB device and
 do not talk to each other.
 
@@ -48,13 +48,16 @@ reference.
 
 - **Two layers per half** — BASE + one momentary layer triggered by that
   half's inner thumb.
-- **LEFT half momentary layer** = left-hand programming symbols (`" ' + |
-  *`, `! [ { ( =`, `\ / ? - &`) + F1–F5.
-- **RIGHT half momentary layer** = arrows on `h/j/k/l`, page/line/word/doc
-  jumps, + F6–F10.
+- **LEFT half momentary layer** = full left-hand programming symbols (`" ' : @ _`,
+  `! [ { ( =`, `< > ] ) }`) + F1–F5.
+- **RIGHT half momentary layer** = arrows on `h/j/k/l`, home/page/doc
+  navigation, Backspace / Enter / Tab / Esc, + F6–F12 (including F11/F12).
 - **Modifiers on dedicated thumb keys**:
-  - LEFT-OUTER thumb = `KC_LGUI` (Cmd on macOS).
-  - RIGHT-OUTER thumb = `MT(MOD_LSFT, KC_ENT)` — tap = Enter, hold = Shift.
+  - LEFT-OUTER thumb = `KC_LGUI` (Cmd on macOS; Ctrl on Windows via PowerToys).
+  - LEFT-MIDDLE thumb = `KC_LALT` (dedicated Alt / Option).
+  - RIGHT-OUTER thumb = `KC_LSFT` (dedicated plain Shift).
+- **Dev-friendly daily-driver coverage** — dedicated Alt + dedicated Shift,
+  F11/F12 on NAV, and full programming-symbol coverage for C# / .NET / IDE work.
 - **No home-row mods** — they're unreliable across independent USB halves.
 - **No IDE Hyper chords** — use your editor's command palette / native shortcuts instead.
 
@@ -67,7 +70,5 @@ See `KEYMAP.md` for the full layer-by-layer breakdown.
 - **Disabling the layout**: open Vial → Configurator → Reset → restore
   factory layout, or maintain a second saved layout that is plain QWERTY
   and switch with `File → Load`.
-- **Tuning the tap-hold**: the right outer thumb (tap Enter / hold Shift)
-  is the only tap-hold key. If it feels off, adjust Vial → QMK Settings →
-  Tapping Term (default 200 ms), and turn on Permissive Hold + Hold On
-  Other Key Press.
+- **No tap-hold tuning**: v4 uses plain modifiers and `MO(1)` layer holds;
+  there are no timing-sensitive thumb keys to tune.
