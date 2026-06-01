@@ -1,359 +1,73 @@
-# macOS install — Dactyl 76 split keyboard with kanata + kanata-tray
+# macOS install — Dactyl 76 with Vial
 
-This is the **end-to-end** procedure that was verified on this Mac.
-It results in a menu-bar icon that auto-starts at login, runs kanata
-as root in the background, and only ever touches the two split halves
-(your MacBook keyboard is completely untouched).
+The Vial design is **firmware-only** — there's no daemon, no menu-bar
+app, no kernel extension. The "install" on macOS is just installing the
+Vial configurator app so you can flash the keymap onto the keyboard's
+EEPROM.
 
-> Tested on: macOS 15 / macOS 26 (arm64), kanata 1.11.0, Karabiner-DriverKit-VirtualHIDDevice 6.2.0 (system ext 1.8.0), kanata-tray 0.8.0.
+> Tested on macOS 15 (Sequoia) and macOS 26 (arm64).
+
+## 1. Install Vial
+
+```bash
+brew install --cask vial
+```
+
+Or download the universal `.dmg` directly from
+[https://get.vial.today](https://get.vial.today).
+
+## 2. First launch
+
+1. Open **Vial** from Applications. You may need to right-click → Open
+   the first time to bypass Gatekeeper.
+2. macOS will ask for **Input Monitoring** permission. Approve it
+   (System Settings → Privacy & Security → Input Monitoring → Vial → on).
+3. Plug in **one half** of the Dactyl. Vial should detect it and show
+   the keyboard at the top of the window.
+
+> If Vial doesn't see the keyboard, unplug + replug the half. Some Mac
+> USB ports power-cycle slowly.
+
+## 3. Configure the keymap
+
+Follow `../vial/SETUP.md` — it walks through every key, click-by-click.
+
+## 4. (Optional) Save a backup of the factory layout
+
+Before changing anything, save the factory layout:
+
+- **File → Save Current Layout As…** → `dactyl_76_left_factory.vil`
+
+Repeat for the right half. Stash these somewhere syncable (Dropbox,
+iCloud Drive, etc.).
 
 ---
 
-## 1. Install kanata + the Karabiner virtual HID driver
-
-```bash
-brew install kanata kanata-tray
-```
-
-Download Karabiner-DriverKit-VirtualHIDDevice **6.2.0** (must match
-kanata's bundled IPC version):
-
-```bash
-curl -LO https://github.com/pqrs-org/Karabiner-DriverKit-VirtualHIDDevice/releases/download/v6.2.0/Karabiner-DriverKit-VirtualHIDDevice-6.2.0.pkg
-sudo installer -pkg Karabiner-DriverKit-VirtualHIDDevice-6.2.0.pkg -target /
-sudo /Applications/.Karabiner-VirtualHIDDevice-Manager.app/Contents/MacOS/Karabiner-VirtualHIDDevice-Manager forceActivate
-```
-
-A system dialog will pop up — open **System Settings → General → Login
-Items & Extensions → Driver Extensions** and toggle
-`Karabiner-VirtualHIDDevice-Manager` ON.
-
-Verify:
-
-```bash
-sudo systemextensionsctl list | grep pqrs
-# expect: [activated enabled]
-```
-
-## 2. Start the Karabiner VHID user-space daemon
-
-```bash
-sudo tee /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist > /dev/null <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>Label</key><string>org.pqrs.Karabiner-VirtualHIDDevice-Daemon</string>
-  <key>ProgramArguments</key><array>
-    <string>/Library/Application Support/org.pqrs/Karabiner-DriverKit-VirtualHIDDevice/Applications/Karabiner-VirtualHIDDevice-Daemon.app/Contents/MacOS/Karabiner-VirtualHIDDevice-Daemon</string>
-  </array>
-  <key>RunAtLoad</key><true/>
-  <key>KeepAlive</key><true/>
-</dict></plist>
-PLIST
-sudo chown root:wheel /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist
-sudo launchctl bootstrap system /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist
-```
-
-Verify the daemon is up:
-
-```bash
-sudo launchctl print system/org.pqrs.Karabiner-VirtualHIDDevice-Daemon | grep state
-# expect: state = running
-pgrep -lf VirtualHIDDevice-Daemon
-```
-
-## 3. Discover your keyboard halves' device names
-
-Plug **both halves** in via USB, then:
-
-```bash
-sudo kanata --list
-```
-
-You should see lines like:
-
-```
-0xE3D84B0E1C969CAB   39572   2   Dactyl_76_L
-0xE3D8590E1C96B475   39572   2   Dactyl_76_R
-```
-
-(Names come from the keyboard firmware — yours may differ. Copy the
-`product_key` strings.)
-
-## 4. Install the configs system-wide
-
-```bash
-sudo mkdir -p /etc/kanata
-sudo cp /path/to/split-keyboard-setup/kanata/common-layers.kbd  /etc/kanata/
-sudo cp /path/to/split-keyboard-setup/kanata/mac.kbd            /etc/kanata/
-```
-
-Edit `/etc/kanata/mac.kbd` and make sure the `macos-dev-names-include`
-block lists your two halves:
-
-```lisp
-(defcfg
-  process-unmapped-keys no
-  concurrent-tap-hold   yes
-  macos-dev-names-include (
-    "Dactyl_76_L"
-    "Dactyl_76_R"
-  )
-)
-```
-
-Create a stub config for the "OFF" tray preset:
-
-```bash
-sudo tee /etc/kanata/off.kbd > /dev/null <<'OFF'
-(defcfg
-  process-unmapped-keys no
-  macos-dev-names-include ()
-)
-(defsrc)
-(deflayer base)
-OFF
-```
-
-Validate:
-
-```bash
-kanata --check -c /etc/kanata/mac.kbd
-kanata --check -c /etc/kanata/off.kbd
-```
-
-## 5. Passwordless sudo + wrapper for kanata
-
-kanata needs root to grab HID devices on macOS. We give it
-*scoped* passwordless sudo so the tray app can start it without
-prompting.
-
-```bash
-echo "$(whoami) ALL=(ALL) NOPASSWD: /opt/homebrew/bin/kanata, /opt/homebrew/Cellar/kanata/*/bin/kanata" | sudo tee /etc/sudoers.d/kanata
-sudo chmod 440 /etc/sudoers.d/kanata
-sudo visudo -c -f /etc/sudoers.d/kanata
-```
-
-Then the wrapper:
-
-```bash
-sudo tee /usr/local/bin/kanata-sudo > /dev/null <<'WRAP'
-#!/bin/bash
-exec /usr/bin/sudo -n /opt/homebrew/bin/kanata "$@"
-WRAP
-sudo chmod 755 /usr/local/bin/kanata-sudo
-/usr/local/bin/kanata-sudo --version   # smoke test
-```
-
-## 6. Grant Input Monitoring + Accessibility
-
-System Settings → Privacy & Security:
-
-- **Input Monitoring** → `+` → press `⌘⇧G` → paste
-  `/opt/homebrew/Cellar/kanata/1.11.0/bin` (use your actual version
-  directory) → select `kanata` → enable it.
-- **Accessibility** → same procedure.
-
-> ⚠ When you upgrade kanata via Homebrew the version dir changes
-> (e.g. 1.11.0 → 1.12.0) and the TCC grant silently invalidates.
-> You'll need to re-grant after `brew upgrade kanata`.
-
-## 7. Configure kanata-tray
-
-```bash
-mkdir -p ~/Library/Application\ Support/kanata-tray
-cat > ~/Library/Application\ Support/kanata-tray/kanata-tray.toml <<'TOML'
-"$schema" = "https://raw.githubusercontent.com/rszyma/kanata-tray/main/doc/config_schema.json"
-
-[general]
-allow_concurrent_presets = false
-control_server_enable    = false
-
-[defaults]
-kanata_executable    = "/usr/local/bin/kanata-sudo"
-tcp_port             = 5829
-autorestart_on_crash = true
-
-[presets.'Dactyl 76 — Split + Layers']
-kanata_config = "/etc/kanata/mac.kbd"
-autorun       = true
-
-[presets.'OFF (passthrough only)']
-kanata_config = "/etc/kanata/off.kbd"
-autorun       = false
-TOML
-```
-
-## 8. Autostart the tray at login (LaunchAgent)
-
-```bash
-cat > ~/Library/LaunchAgents/com.github.kanata-tray.plist <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>Label</key><string>com.github.kanata-tray</string>
-  <key>ProgramArguments</key><array>
-    <string>/opt/homebrew/bin/kanata-tray</string>
-  </array>
-  <key>RunAtLoad</key><true/>
-  <key>KeepAlive</key><true/>
-  <key>StandardOutPath</key><string>$HOME/Library/Logs/kanata-tray.log</string>
-  <key>StandardErrorPath</key><string>$HOME/Library/Logs/kanata-tray.log</string>
-  <key>EnvironmentVariables</key><dict>
-    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-  </dict>
-</dict></plist>
-PLIST
-
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.github.kanata-tray.plist
-```
-
-You should immediately see the **kanata-tray icon in the macOS menu
-bar** (top-right). Click it → you'll see the two presets. The
-`Dactyl 76 — Split + Layers` preset autoruns.
-
-## 9. Do the Vial step (see `../vial/SETUP.md`)
-
-In Vial, set:
-- inner-LEFT thumb → **F14**
-- inner-RIGHT thumb → **F13**
-
-Until you do this, layers won't activate — kanata is grabbing the
-halves but there are no F13/F14 events to trigger NAV/SYM.
-
-## 10. Smoke test
-
-After Vial setup:
-
-- Hold the **right inner thumb** and tap `j` → should produce `↓`.
-- Hold the **left inner thumb** and tap `q` → should produce `!`.
-
-Look at `~/Library/Logs/kanata-tray.log` if anything misbehaves.
-
----
-
-## Disabling temporarily
-
-- Click the menu-bar icon → switch preset to **OFF** (or just **Stop**).
-- Or unplug both halves — kanata only ever touches those two devices.
-
-## After unplug / replug → run `kanata-restart`
-
-kanata 1.11.0 holds device handles for its lifetime. If the keyboard is
-unplugged and replugged (or you boot without it and connect it later),
-kanata's existing handles are stale: keys pass through with **no
-layers** but the process still looks healthy.
-
-Bounce the tray to re-grab:
-
-```bash
-kanata-restart       # symlinked from scripts/kanata-restart
-# or manually:
-launchctl bootout  "gui/$(id -u)/com.github.kanata-tray"
-launchctl bootstrap "gui/$(id -u)" ~/Library/LaunchAgents/com.github.kanata-tray.plist
-```
-
-**Test it's actually working** without typing-and-guessing:
-
-```bash
-# Hold inner-right thumb while this runs — you should see LayerChange events.
-echo '{"RequestCurrentLayerName":{}}' | nc 127.0.0.1 5829
-```
-
-If holding the thumb produces `{"LayerChange":{"new":"nav"}}`, the full
-stack (Vial → kanata → layers) is working.
-
-## Known issue — built-in MacBook `fn` key stops working after install
-
-After kanata + the Karabiner virtual device are running, you may notice the
-**built-in MacBook keyboard's `fn` key has no effect** — `fn+F1`,
-`fn+F11`, `fn+arrow`, etc. all do nothing on the built-in. The split halves
-are unaffected.
-
-**Cause** (not a bug in kanata or in our config — it's a macOS UX quirk):
-
-- kanata can't write key events on macOS directly; it injects through the
-  Karabiner-DriverKit-VirtualHIDDevice driver.
-- That driver presents macOS with a virtual keyboard called
-  `Karabiner DriverKit VirtualHIDKeyboard 1.8.0` (vendor `5824`, product
-  `10203`, manufacturer `pqrs.org`).
-- macOS's per-keyboard *Function Keys* / *Modifier Keys* preferences
-  silently get re-bound to the most-recently-seen keyboard. When the virtual
-  keyboard appears, the built-in's preferences become orphaned and its `fn`
-  key handler is no longer wired up.
-- **Your built-in keyboard is not being grabbed.** `macos-dev-names-include`
-  in `kanata/mac.kbd` only allows `Dactyl_76_L` / `Dactyl_76_R` through.
-  Confirm with: `ioreg -p IOService -l -c IOHIDKeyboard | grep '"Product"'`.
-
-### Two-prompt expected on first install
-
-When the Karabiner virtual device first appears, macOS pops up the
-**Keyboard Setup Assistant**: *"Your pqrs keyboard could not be identified."*
-Click **Continue** and press the key immediately to the right of left-Shift
-(`Z` on ANSI). The wizard writes the type to
-`/Library/Preferences/com.apple.keyboardtype.plist`; the prompt won't come
-back. This step alone is not enough to fix the `fn` issue — see the reset
-below.
-
-### Reset — rebind the built-in's `fn` handler
-
-1. **Exit the kanata-tray** (menu-bar icon → *Exit tray*).
-2. **Unload the Karabiner virtual device daemon** so the virtual keyboard
-   disappears from macOS:
-
-   ```bash
-   sudo launchctl bootout system /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist
-   hidutil list | grep -i karabiner   # should print nothing
-   ```
-
-3. **Open System Settings → Keyboard → "Keyboard Shortcuts…" → Function Keys**.
-   With the virtual keyboard gone, the per-keyboard dropdown should show
-   only `Apple Internal Keyboard / Trackpad`. Toggle *"Use F1, F2… as
-   standard function keys"* once (off → on, or on → off) to force macOS to
-   re-bind the `fn` handler to the built-in.
-4. Also open **"Modifier Keys…"** and confirm the dropdown reads
-   `Apple Internal Keyboard / Trackpad`.
-5. **Verify** `fn+F1` works on the built-in *while kanata is stopped*. If
-   it doesn't, the cause is something else — file an issue with the output
-   of `hidutil list` and `defaults read /Library/Preferences/com.apple.keyboardtype`.
-6. **Bring the virtual device back**:
-
-   ```bash
-   sudo launchctl bootstrap system /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist
-   open -a kanata-tray
-   ```
-
-7. Test `fn+F1` again with kanata running — should still work. The fn
-   preference is keyed off the built-in's vendor/product/location, so it
-   sticks across virtual-keyboard appearances.
-
-### If it breaks again after a kanata or Karabiner update
-
-Bumping the Karabiner driver version (e.g. `1.8.0 → 1.9.0`) changes the
-virtual keyboard's `Product` string, which macOS treats as a brand-new
-device. You'll get the *"could not be identified"* prompt again and may
-need to redo the reset above. Run it once per upgrade.
-
-### Why we can't make this fully transparent
-
-The virtual keyboard's vendor/product IDs are hard-coded in the
-Karabiner-DriverKit-VirtualHIDDevice system extension. kanata has no knob
-to override them. Making it masquerade as Apple's vendor/product would
-require patching and re-signing the system extension, which isn't
-worth the complexity for a one-time setup quirk.
-
----
+## Why there's no daemon / extension
+
+The earlier kanata-based design needed root privileges, a kernel
+extension (Karabiner DriverKit), a system LaunchDaemon, a user
+LaunchAgent for the tray app, and a passwordless sudo entry. **None of
+that is needed with Vial** — the layout lives on the keyboard's MCU and
+the OS just sees standard HID input.
+
+This also means:
+
+- **Your built-in MacBook `fn` key works normally** — no virtual
+  keyboard is created, so the macOS keyboard-discovery quirk that
+  affected the kanata design (issue [#975](https://github.com/jtroo/kanata/issues/975))
+  doesn't apply.
+- **No re-grant after `brew upgrade`** — Input Monitoring is granted to
+  the Vial app's bundle ID, not a kanata version directory.
+- **The keyboard works on any Mac** you plug it into, with or without
+  Vial installed. Vial is only needed to *change* the layout.
 
 ## Uninstall
 
 ```bash
-launchctl bootout gui/$(id -u)/com.github.kanata-tray
-sudo launchctl bootout system/org.pqrs.Karabiner-VirtualHIDDevice-Daemon
-rm ~/Library/LaunchAgents/com.github.kanata-tray.plist
-sudo rm /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist
-sudo rm /etc/sudoers.d/kanata /usr/local/bin/kanata-sudo
-sudo rm -rf /etc/kanata
-brew uninstall kanata kanata-tray
-# To remove the Karabiner VHID driver:
-sudo /Applications/.Karabiner-VirtualHIDDevice-Manager.app/Contents/MacOS/Karabiner-VirtualHIDDevice-Manager forceDeactivate
+brew uninstall --cask vial
 ```
+
+The keyboard keeps its layout (it's stored on the MCU). To revert to
+factory, load the backup `.vil` file you saved in step 4, or use Vial's
+factory-reset option.

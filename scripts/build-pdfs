@@ -1,22 +1,42 @@
 #!/usr/bin/env bash
-# Build CHEATSHEET.html and CHEATSHEET.pdf from CHEATSHEET.md.
+# Build printable HTML + PDF renderings for KEYMAP.md and CHEATSHEET.md.
 #
 # Requires:
 #   - node + npx in PATH (we use `npx -y marked` so no install needed)
 #   - Google Chrome, Chromium, or Microsoft Edge (used in headless mode for PDF)
+#
+# Usage:
+#   ./scripts/build-pdfs               # build both KEYMAP and CHEATSHEET
+#   ./scripts/build-pdfs CHEATSHEET    # build only CHEATSHEET
+#   ./scripts/build-pdfs KEYMAP        # build only KEYMAP
 #
 # Output is git-ignored (see .gitignore).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-SRC=CHEATSHEET.md
-HTML=CHEATSHEET.html
-PDF=CHEATSHEET.pdf
+# Targets: each is "BASENAME:TITLE" — basename matches BASENAME.md → BASENAME.{html,pdf}.
+ALL_TARGETS=(
+  "KEYMAP:Dactyl 76 — KEYMAP"
+  "CHEATSHEET:Dactyl 76 — CHEATSHEET"
+)
 
-if [[ ! -f "$SRC" ]]; then
-  echo "Missing source: $SRC" >&2
-  exit 1
+if [[ $# -gt 0 ]]; then
+  REQUESTED="$1"
+  TARGETS=()
+  for t in "${ALL_TARGETS[@]}"; do
+    if [[ "${t%%:*}" == "$REQUESTED" ]]; then
+      TARGETS+=("$t")
+    fi
+  done
+  if [[ ${#TARGETS[@]} -eq 0 ]]; then
+    echo "Unknown target: $REQUESTED" >&2
+    echo "Known targets:" >&2
+    for t in "${ALL_TARGETS[@]}"; do echo "  ${t%%:*}" >&2; done
+    exit 1
+  fi
+else
+  TARGETS=("${ALL_TARGETS[@]}")
 fi
 
 # Locate a Chromium-family browser.
@@ -48,14 +68,31 @@ if ! command -v npx >/dev/null 2>&1; then
 fi
 
 echo "Rendering Markdown -> HTML..."
-BODY="$(npx --yes marked@13 --gfm < "$SRC")"
 
-cat > "$HTML" <<'HEAD'
+TMP_USER_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_USER_DIR"' EXIT
+
+for target in "${TARGETS[@]}"; do
+  BASE="${target%%:*}"
+  TITLE="${target#*:}"
+  SRC="$BASE.md"
+  HTML="$BASE.html"
+  PDF="$BASE.pdf"
+
+  if [[ ! -f "$SRC" ]]; then
+    echo "Missing source: $SRC — skipping." >&2
+    continue
+  fi
+
+  echo "  $SRC -> $HTML"
+  BODY="$(npx --yes marked@13 --gfm < "$SRC")"
+
+  cat > "$HTML" <<HEAD
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Split Keyboard Cheatsheet</title>
+<title>$TITLE</title>
 <style>
   @page { size: Letter landscape; margin: 10mm 12mm; }
   html, body {
@@ -72,6 +109,7 @@ cat > "$HTML" <<'HEAD'
     break-after: avoid;
   }
   h2:first-of-type { margin-top: 4pt; }
+  h3 { font-size: 10.5pt; margin: 6pt 0 2pt; break-after: avoid; }
   pre, code, kbd {
     font-family: "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Courier New", monospace;
   }
@@ -86,8 +124,8 @@ cat > "$HTML" <<'HEAD'
   pre code { background: transparent; padding: 0; font-size: inherit; }
   ul { margin: 2pt 0 4pt 18pt; padding: 0; }
   li { margin: 1pt 0; }
-  table { border-collapse: collapse; margin: 4pt 0; font-size: 9pt; break-inside: avoid; }
-  th, td { border: 1px solid #aaa; padding: 1pt 6pt; text-align: left; }
+  table { border-collapse: collapse; margin: 4pt 0; font-size: 8.5pt; break-inside: avoid; }
+  th, td { border: 1px solid #aaa; padding: 1pt 6pt; text-align: left; vertical-align: top; }
   th { background: #eee; }
   blockquote {
     border-left: 3px solid #888;
@@ -102,33 +140,35 @@ cat > "$HTML" <<'HEAD'
 <body>
 HEAD
 
-printf '%s\n' "$BODY" >> "$HTML"
-echo "</body></html>" >> "$HTML"
+  printf '%s\n' "$BODY" >> "$HTML"
+  echo "</body></html>" >> "$HTML"
 
-echo "Rendering HTML -> PDF (headless browser)..."
-TMP_USER_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_USER_DIR"' EXIT
-
-"$BROWSER" \
-  --headless=new \
-  --disable-gpu \
-  --no-pdf-header-footer \
-  --user-data-dir="$TMP_USER_DIR" \
-  --print-to-pdf="$PWD/$PDF" \
-  "file://$PWD/$HTML" >/dev/null 2>&1 || {
-    # Fallback for older Chrome that doesn't know --headless=new
-    "$BROWSER" \
-      --headless \
-      --disable-gpu \
-      --no-pdf-header-footer \
-      --user-data-dir="$TMP_USER_DIR" \
-      --print-to-pdf="$PWD/$PDF" \
-      "file://$PWD/$HTML" >/dev/null 2>&1
-  }
+  echo "  $HTML -> $PDF"
+  "$BROWSER" \
+    --headless=new \
+    --disable-gpu \
+    --no-pdf-header-footer \
+    --user-data-dir="$TMP_USER_DIR" \
+    --print-to-pdf="$PWD/$PDF" \
+    "file://$PWD/$HTML" >/dev/null 2>&1 || {
+      # Fallback for older Chrome that doesn't know --headless=new
+      "$BROWSER" \
+        --headless \
+        --disable-gpu \
+        --no-pdf-header-footer \
+        --user-data-dir="$TMP_USER_DIR" \
+        --print-to-pdf="$PWD/$PDF" \
+        "file://$PWD/$HTML" >/dev/null 2>&1
+    }
+done
 
 echo
-echo "Wrote: $HTML"
-echo "Wrote: $PDF"
+echo "Done. Output files (git-ignored):"
+for target in "${TARGETS[@]}"; do
+  BASE="${target%%:*}"
+  [[ -f "$BASE.pdf" ]] && echo "  $BASE.pdf"
+  [[ -f "$BASE.html" ]] && echo "  $BASE.html"
+done
 echo
-echo "Open with:  open '$PDF'"
-echo "Print with: lp '$PDF'   (or use Preview -> Cmd+P)"
+echo "Open with:  open '<file>.pdf'"
+echo "Print with: lp '<file>.pdf'   (or use Preview -> Cmd+P)"

@@ -1,83 +1,81 @@
 # Split Keyboard Cheatsheet
 
-One-page reference for the current Kanata layers.
+One-page printable reference for the Dactyl 76 Vial layout.
 
-## Layer Access
+## Thumb cluster
 
-- **BASE:** normal QWERTY/number-row typing.
-- **SYM:** hold left inner thumb (`F14`).
-- **NAV:** hold right inner thumb (`F13`).
-- **FN:** hold the opposite inner thumb while in SYM/NAV.
-- `─` = passthrough; visible `_` on SYM = underscore. Positions `1` and `0` stay passthrough on non-BASE layers.
-
-## NAV Layer
-
-```text
-┌────────┬────────┬────────┬────────┬────────┐                ┌────────┬────────┬────────┬────────┬────────┐
-│   ─    │   ─    │   ─    │   ─    │   ─    │                │   ─    │   ─    │   ─    │   ─    │   ─    │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│   ─    │   ─    │   ─    │   ─    │   ─    │                │  DocB  │  Home  │  PgUp  │  End   │  DocE  │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│  Cmd   │  Ctrl  │  Alt   │ Shift  │   ─    │                │   ←    │   ↓    │   ↑    │   →    │   ─    │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│  Undo  │  Cut   │  Copy  │ Paste  │  Redo  │                │  Wrd←  │   ─    │  PgDn  │  Wrd→  │   ─    │
-└────────┴────────┴────────┴────────┴────────┘                └────────┴────────┴────────┴────────┴────────┘
+```
+LEFT (outer→inner):    Cmd     Backspace    [hold = SYM]
+RIGHT (inner→outer):   [hold = NAV]    Space    Enter/Shift
 ```
 
-- One-shot mods: `a s d f` = Cmd/Ctrl/Alt/Shift, then use right-hand arrows.
-- Clipboard: `z x c v b` = Undo/Cut/Copy/Paste/Redo.
-- Movement: `h j k l` = ← ↓ ↑ →, `n .` = word left/right, `y p` = document begin/end.
+`Enter/Shift` = tap for Enter, hold for Shift.
 
-## SYM Layer
+## Modifier chords (BASE)
 
-```text
-┌────────┬────────┬────────┬────────┬────────┐                ┌────────┬────────┬────────┬────────┬────────┐
-│   ─    │   @    │   #    │   $    │   %    │                │   `    │   ^    │   ~    │   :    │   ─    │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│   "    │   '    │   +    │   |    │   *    │                │   :    │   |    │   <    │   >    │   ?    │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│   !    │   [    │   {    │   (    │   =    │                │   =    │   )    │   }    │   ]    │   ;    │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│   \    │   /    │   ?    │   -    │   &    │                │   &    │   _    │   ,    │   .    │   /    │
-└────────┴────────┴────────┴────────┴────────┘                └────────┴────────┴────────┴────────┴────────┘
-```
+| Action                 | Combo                                                      |
+|------------------------|------------------------------------------------------------|
+| Cmd + letter           | hold LEFT-OUTER + tap letter (either hand)                 |
+| Capital                | hold RIGHT-OUTER (Shift) + tap letter                      |
+| Cmd+C / V / X / Z      | hold LEFT-OUTER + tap `c` / `v` / `x` / `z`                |
+| Redo (Cmd+Shift+Z)     | hold LEFT-OUTER + hold RIGHT-OUTER + tap `z`               |
+| Select arrow-by-arrow  | hold RIGHT-OUTER + hold RIGHT-INNER + tap `h`/`j`/`k`/`l`  |
+| Select word-by-word    | hold RIGHT-OUTER + hold RIGHT-INNER + tap `n` / `.`        |
 
-- Brackets mirror across hands: `s/l []`, `d/k {}`, `f/j ()`.
-- Programming symbols are direct — no shift-chord required.
+> On Windows install PowerToys with the remaps in `install/windows.md`;
+> after that, "Cmd" above = Ctrl, and word-jumps still work.
 
-> **Cross-hand digraphs:** `g`+`h` = `==`, `b`+`n` = `&&`, `r`+`u` = `||`, `x`+`/` = `//`, `c`+`p` = `??`, `c`+`.` = `?.`.
-
-## FN / IDE Layer
+## LEFT-SYM (hold left inner thumb)
 
 ```text
-┌────────┬────────┬────────┬────────┬────────┐                ┌────────┬────────┬────────┬────────┬────────┐
-│   ─    │   F2   │   F3   │   F4   │   F5   │                │   F6   │   F7   │   F8   │   F9   │   ─    │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│   F1   │   ─    │ Recent │  Run   │  Test  │                │   ─    │ Usages │   ─    │  Open  │  F10   │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│   ─    │  Side  │ Debug  │ Format │  Goto  │                │  Back  │   ─    │   ─    │  Fwd   │   ─    │
-├────────┼────────┼────────┼────────┼────────┤                ├────────┼────────┼────────┼────────┼────────┤
-│   ─    │   ─    │   ─    │   ─    │ Build  │                │ Rename │Terminal│   ─    │   ─    │   ─    │
-└────────┴────────┴────────┴────────┴────────┘                └────────┴────────┴────────┴────────┴────────┘
+┌────────┬────────┬────────┬────────┬────────┐
+│   F1   │   F2   │   F3   │   F4   │   F5   │
+├────────┼────────┼────────┼────────┼────────┤
+│   "    │   '    │   +    │   |    │   *    │
+├────────┼────────┼────────┼────────┼────────┤
+│   !    │   [    │   {    │   (    │   =    │
+├────────┼────────┼────────┼────────┼────────┤
+│   \    │   /    │   ?    │   -    │   &    │
+└────────┴────────┴────────┴────────┴────────┘
 ```
 
-| Position | Action | Hyper chord |
-|---:|---|---|
-| `b` | Build | `M-C-A-S-b` |
-| `r` | Run | `M-C-A-S-r` |
-| `t` | Test | `M-C-A-S-t` |
-| `d` | Debug | `M-C-A-S-d` |
-| `f` | Format | `M-C-A-S-f` |
-| `g` | Goto | `M-C-A-S-g` |
-| `u` | Usages | `M-C-A-S-u` |
-| `n` | Rename | `M-C-A-S-n` |
-| `h/l` | Back / Forward | `M-C-A-S-[` / `M-C-A-S-]` |
-| `e/o` | Recent / Open | `M-C-A-S-e` / `M-C-A-S-p` |
-| `m/s` | Terminal / Sidebar | `` M-C-A-S-` `` / `M-C-A-S-s` |
+- All symbols are direct (no Shift chord needed).
+- Brackets mirror across hands: **`s/l = []`**, **`d/k = {}`**, **`f/j = ()`**.
+- For closing brackets, use the right hand — but they're not on a layer,
+  so just type them via outer pinky col or via the standard `]`/`}`/`)`
+  keys on your existing Vial layout.
 
-## Daily Patterns
+## RIGHT-NAV (hold right inner thumb)
 
-- **Select while moving:** NAV `f` (Shift) + `h/j/k/l`.
-- **Line/document jumps:** NAV `a`/`s` one-shot with arrows, or use `y/p` for document begin/end.
-- **Word hops:** NAV `d` (Alt) + arrows, or direct `n/.`.
-- **Fast coding pairs:** SYM mirrored brackets plus cross-hand digraphs keep both hands alternating.
+```text
+┌────────┬────────┬────────┬────────┬────────┐
+│   F6   │   F7   │   F8   │   F9   │  F10   │
+├────────┼────────┼────────┼────────┼────────┤
+│  DocB  │  Home  │  PgUp  │  End   │  DocE  │
+├────────┼────────┼────────┼────────┼────────┤
+│   ←    │   ↓    │   ↑    │   →    │  Esc   │
+├────────┼────────┼────────┼────────┼────────┤
+│  Wrd←  │  Tab   │  PgDn  │  Wrd→  │   ─    │
+└────────┴────────┴────────┴────────┴────────┘
+```
+
+- Arrows on `h j k l` (Vim-style).
+- Page / line / doc navigation on the top alpha row.
+- Word jumps on `n` (left) and `.` (right).
+- Esc on `;` for modal editors. Tab on `m` for in-place indent.
+
+## Daily patterns
+
+| Task                         | Move                                              |
+|------------------------------|---------------------------------------------------|
+| Copy a paragraph             | Hold RIGHT-OUTER+RIGHT-INNER, tap `j` for each line, then LEFT-OUTER + `c` |
+| Jump to start of file        | Hold RIGHT-INNER, tap `y` (DocB = Cmd+Up on Mac)  |
+| Comment one line (IDE-dep.)  | LEFT-OUTER + `/`  (Cmd+/ in most editors)         |
+| Type `{ }` for a block       | Hold left inner thumb, tap `d` then right pinky for `}` |
+| Save                         | LEFT-OUTER + `s`                                  |
+| Find                         | LEFT-OUTER + `f`                                  |
+| Switch tabs                  | LEFT-OUTER + RIGHT-OUTER + Tab? (use IDE shortcut)|
+
+> No layered IDE Hyper chords in this build — use your editor's native
+> command palette (`Cmd+P` / `Cmd+Shift+P`) for actions that don't have a
+> direct shortcut.

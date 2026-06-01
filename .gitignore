@@ -1,3 +1,5 @@
-# Generated cheatsheet artifacts
+# Generated artifacts (rebuild via scripts/build-pdfs)
 CHEATSHEET.html
 CHEATSHEET.pdf
+KEYMAP.html
+KEYMAP.pdf
