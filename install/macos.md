@@ -5,7 +5,7 @@ It results in a menu-bar icon that auto-starts at login, runs kanata
 as root in the background, and only ever touches the two split halves
 (your MacBook keyboard is completely untouched).
 
-> Tested on: macOS 15 (arm64), kanata 1.11.0, Karabiner-DriverKit-VirtualHIDDevice 6.2.0, kanata-tray 0.8.0.
+> Tested on: macOS 15 / macOS 26 (arm64), kanata 1.11.0, Karabiner-DriverKit-VirtualHIDDevice 6.2.0 (system ext 1.8.0), kanata-tray 0.8.0.
 
 ---
 
@@ -262,6 +262,87 @@ echo '{"RequestCurrentLayerName":{}}' | nc 127.0.0.1 5829
 
 If holding the thumb produces `{"LayerChange":{"new":"nav"}}`, the full
 stack (Vial → kanata → layers) is working.
+
+## Known issue — built-in MacBook `fn` key stops working after install
+
+After kanata + the Karabiner virtual device are running, you may notice the
+**built-in MacBook keyboard's `fn` key has no effect** — `fn+F1`,
+`fn+F11`, `fn+arrow`, etc. all do nothing on the built-in. The split halves
+are unaffected.
+
+**Cause** (not a bug in kanata or in our config — it's a macOS UX quirk):
+
+- kanata can't write key events on macOS directly; it injects through the
+  Karabiner-DriverKit-VirtualHIDDevice driver.
+- That driver presents macOS with a virtual keyboard called
+  `Karabiner DriverKit VirtualHIDKeyboard 1.8.0` (vendor `5824`, product
+  `10203`, manufacturer `pqrs.org`).
+- macOS's per-keyboard *Function Keys* / *Modifier Keys* preferences
+  silently get re-bound to the most-recently-seen keyboard. When the virtual
+  keyboard appears, the built-in's preferences become orphaned and its `fn`
+  key handler is no longer wired up.
+- **Your built-in keyboard is not being grabbed.** `macos-dev-names-include`
+  in `kanata/mac.kbd` only allows `Dactyl_76_L` / `Dactyl_76_R` through.
+  Confirm with: `ioreg -p IOService -l -c IOHIDKeyboard | grep '"Product"'`.
+
+### Two-prompt expected on first install
+
+When the Karabiner virtual device first appears, macOS pops up the
+**Keyboard Setup Assistant**: *"Your pqrs keyboard could not be identified."*
+Click **Continue** and press the key immediately to the right of left-Shift
+(`Z` on ANSI). The wizard writes the type to
+`/Library/Preferences/com.apple.keyboardtype.plist`; the prompt won't come
+back. This step alone is not enough to fix the `fn` issue — see the reset
+below.
+
+### Reset — rebind the built-in's `fn` handler
+
+1. **Exit the kanata-tray** (menu-bar icon → *Exit tray*).
+2. **Unload the Karabiner virtual device daemon** so the virtual keyboard
+   disappears from macOS:
+
+   ```bash
+   sudo launchctl bootout system /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist
+   hidutil list | grep -i karabiner   # should print nothing
+   ```
+
+3. **Open System Settings → Keyboard → "Keyboard Shortcuts…" → Function Keys**.
+   With the virtual keyboard gone, the per-keyboard dropdown should show
+   only `Apple Internal Keyboard / Trackpad`. Toggle *"Use F1, F2… as
+   standard function keys"* once (off → on, or on → off) to force macOS to
+   re-bind the `fn` handler to the built-in.
+4. Also open **"Modifier Keys…"** and confirm the dropdown reads
+   `Apple Internal Keyboard / Trackpad`.
+5. **Verify** `fn+F1` works on the built-in *while kanata is stopped*. If
+   it doesn't, the cause is something else — file an issue with the output
+   of `hidutil list` and `defaults read /Library/Preferences/com.apple.keyboardtype`.
+6. **Bring the virtual device back**:
+
+   ```bash
+   sudo launchctl bootstrap system /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist
+   open -a kanata-tray
+   ```
+
+7. Test `fn+F1` again with kanata running — should still work. The fn
+   preference is keyed off the built-in's vendor/product/location, so it
+   sticks across virtual-keyboard appearances.
+
+### If it breaks again after a kanata or Karabiner update
+
+Bumping the Karabiner driver version (e.g. `1.8.0 → 1.9.0`) changes the
+virtual keyboard's `Product` string, which macOS treats as a brand-new
+device. You'll get the *"could not be identified"* prompt again and may
+need to redo the reset above. Run it once per upgrade.
+
+### Why we can't make this fully transparent
+
+The virtual keyboard's vendor/product IDs are hard-coded in the
+Karabiner-DriverKit-VirtualHIDDevice system extension. kanata has no knob
+to override them. Making it masquerade as Apple's vendor/product would
+require patching and re-signing the system extension, which isn't
+worth the complexity for a one-time setup quirk.
+
+---
 
 ## Uninstall
 
